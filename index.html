@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>24</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" href="icons/icon-192.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="icons/icon-192.svg">
+    <meta name="theme-color" content="#050505">
+</head>
+<body>
+    <main>
+        <header>
+            <h1 class="logo">24</h1>
+        </header>
+
+        <section class="countdown-container">
+            <div class="label subtitle">REMAINING TODAY</div>
+            <div class="countdown" id="countdown" aria-live="off">24:00:00</div>
+            
+            <div class="info-group">
+                <div class="date" id="date"></div>
+                <div class="timezone" id="timezone"></div>
+            </div>
+        </section>
+
+        <footer>
+            <p>You don't have 24 hours.</p>
+            <p>You have what's left.</p>
+        </footer>
+    </main>
+    <script src="script.js"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js').catch(err => {
+                    console.error('ServiceWorker registration failed: ', err);
+                });
+            });
+        }
+    </script>
+</body>
+</html>
