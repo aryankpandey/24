@@ -86,3 +86,41 @@ document.addEventListener('visibilitychange', () => {
 
 // Start loop
 requestAnimationFrame(update);
+
+// Menu Interaction Logic
+const menuBtn = document.getElementById('menuBtn');
+const menuOverlay = document.getElementById('menuOverlay');
+const closeBtn = document.getElementById('closeBtn');
+const tabAbout = document.getElementById('tabAbout');
+const tabContact = document.getElementById('tabContact');
+const paneAbout = document.getElementById('paneAbout');
+const paneContact = document.getElementById('paneContact');
+
+menuBtn.addEventListener('click', () => {
+    menuOverlay.classList.add('active');
+});
+
+closeBtn.addEventListener('click', () => {
+    menuOverlay.classList.remove('active');
+});
+
+// Close overlay when clicking outside the content box
+menuOverlay.addEventListener('click', (e) => {
+    if (e.target === menuOverlay) {
+        menuOverlay.classList.remove('active');
+    }
+});
+
+tabAbout.addEventListener('click', () => {
+    tabAbout.classList.add('active');
+    tabContact.classList.remove('active');
+    paneAbout.classList.add('active');
+    paneContact.classList.remove('active');
+});
+
+tabContact.addEventListener('click', () => {
+    tabContact.classList.add('active');
+    tabAbout.classList.remove('active');
+    paneContact.classList.add('active');
+    paneAbout.classList.remove('active');
+});
