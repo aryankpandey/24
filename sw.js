@@ -1,9 +1,12 @@
-const CACHE_NAME = '24-cache-v2';
+const CACHE_NAME = '24-cache-v3';
 const urlsToCache = [
     './',
     './index.html',
+    './tools.html',
     './style.css',
     './script.js',
+    './tools.js',
+    './utils.js',
     './manifest.json',
     './icons/icon-192.svg',
     './icons/icon-512.svg'

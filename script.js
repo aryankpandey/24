@@ -84,8 +84,10 @@ document.addEventListener('visibilitychange', () => {
     }
 });
 
-// Start loop
-requestAnimationFrame(update);
+// Start loop only on pages with the countdown element
+if (countdownEl) {
+    requestAnimationFrame(update);
+}
 
 // Menu Interaction Logic
 const menuBtn = document.getElementById('menuBtn');
@@ -93,34 +95,61 @@ const menuOverlay = document.getElementById('menuOverlay');
 const closeBtn = document.getElementById('closeBtn');
 const tabAbout = document.getElementById('tabAbout');
 const tabContact = document.getElementById('tabContact');
+const tabTools = document.getElementById('tabTools');
 const paneAbout = document.getElementById('paneAbout');
 const paneContact = document.getElementById('paneContact');
 
-menuBtn.addEventListener('click', () => {
-    menuOverlay.classList.add('active');
-});
+if (menuBtn) {
+    menuBtn.addEventListener('click', () => {
+        menuOverlay.classList.add('active');
+    });
+}
 
-closeBtn.addEventListener('click', () => {
-    menuOverlay.classList.remove('active');
-});
+if (closeBtn) {
+    closeBtn.addEventListener('click', () => {
+        menuOverlay.classList.remove('active');
+    });
+}
 
 // Close overlay when clicking outside the content box
-menuOverlay.addEventListener('click', (e) => {
-    if (e.target === menuOverlay) {
-        menuOverlay.classList.remove('active');
-    }
-});
+if (menuOverlay) {
+    menuOverlay.addEventListener('click', (e) => {
+        if (e.target === menuOverlay) {
+            menuOverlay.classList.remove('active');
+        }
+    });
+}
 
-tabAbout.addEventListener('click', () => {
-    tabAbout.classList.add('active');
-    tabContact.classList.remove('active');
-    paneAbout.classList.add('active');
-    paneContact.classList.remove('active');
-});
+if (tabAbout) {
+    tabAbout.addEventListener('click', () => {
+        tabAbout.classList.add('active');
+        tabContact.classList.remove('active');
+        tabTools && tabTools.classList.remove('active');
+        paneAbout && paneAbout.classList.add('active');
+        paneContact && paneContact.classList.remove('active');
+    });
+}
 
-tabContact.addEventListener('click', () => {
-    tabContact.classList.add('active');
-    tabAbout.classList.remove('active');
-    paneContact.classList.add('active');
-    paneAbout.classList.remove('active');
-});
+if (tabContact) {
+    tabContact.addEventListener('click', () => {
+        tabContact.classList.add('active');
+        tabAbout.classList.remove('active');
+        tabTools && tabTools.classList.remove('active');
+        paneContact && paneContact.classList.add('active');
+        paneAbout && paneAbout.classList.remove('active');
+    });
+}
+
+// Tools navigation — navigate to tools.html; on tools page, just close menu
+if (tabTools) {
+    const isToolsPage = document.body.classList.contains('tools-page');
+    tabTools.addEventListener('click', () => {
+        if (isToolsPage) {
+            menuOverlay && menuOverlay.classList.remove('active');
+        } else {
+            menuOverlay && menuOverlay.classList.remove('active');
+            window.location.href = 'tools.html';
+        }
+    });
+}
+

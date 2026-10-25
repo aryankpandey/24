@@ -304,3 +304,237 @@ body.state-warning .countdown {
     from { opacity: 0; transform: translateY(10px); }
     to { opacity: 1; transform: translateY(0); }
 }
+
+/* ===== Tools Page ===== */
+
+/* Allow scrolling on tools page */
+body.tools-page {
+    overflow: auto;
+    align-items: flex-start;
+}
+
+body.tools-page main {
+    height: auto;
+    min-height: 100vh;
+    min-height: 100dvh;
+    padding-top: 6vh;
+    padding-bottom: 6vh;
+}
+
+.logo-link {
+    text-decoration: none;
+    color: inherit;
+}
+
+.tools-container {
+    display: flex;
+    flex-direction: column;
+    gap: 48px;
+    width: 100%;
+    padding: 32px 0;
+    animation: fadeIn 0.4s ease;
+}
+
+.tools-container .subtitle {
+    margin-bottom: 0;
+}
+
+.tool {
+    width: 100%;
+    text-align: left;
+}
+
+.tool-desc {
+    font-size: 14px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    margin-bottom: 20px;
+}
+
+/* Preset buttons */
+.preset-buttons {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+}
+
+.preset-btn {
+    background-color: #1a1a1a;
+    border: 1px solid #333;
+    color: var(--text-primary);
+    font-family: var(--font-sans);
+    font-size: 13px;
+    font-weight: 600;
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    letter-spacing: 0.5px;
+}
+
+.preset-btn:hover {
+    background-color: #222;
+    border-color: #555;
+}
+
+.preset-btn:active {
+    transform: scale(0.96);
+}
+
+/* Input group */
+.input-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.input-group label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.input-group input[type="date"],
+.input-group input[type="time"] {
+    background-color: #111;
+    border: 1px solid #333;
+    color: var(--text-primary);
+    font-family: var(--font-mono);
+    font-size: 14px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    outline: none;
+    transition: border-color 0.2s ease;
+    -webkit-appearance: none;
+    color-scheme: dark;
+}
+
+.input-group input:focus {
+    border-color: var(--text-primary);
+}
+
+/* Result display */
+.result {
+    font-family: var(--font-mono);
+    font-size: clamp(20px, 5vw, 32px);
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    line-height: 1.3;
+    margin-bottom: 16px;
+    font-variant-numeric: tabular-nums;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+}
+
+.result.past {
+    color: var(--accent-red);
+    font-size: 16px;
+    font-weight: 400;
+    letter-spacing: 0;
+}
+
+/* Reset button */
+.reset-btn {
+    background: none;
+    border: 1px solid #333;
+    color: var(--text-secondary);
+    font-family: var(--font-sans);
+    font-size: 13px;
+    font-weight: 600;
+    padding: 8px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    letter-spacing: 0.5px;
+}
+
+.reset-btn:hover {
+    color: var(--text-primary);
+    border-color: #555;
+}
+
+/* Year Progress */
+.year-info {
+    font-family: var(--font-mono);
+    font-size: 14px;
+    color: var(--text-primary);
+    margin-bottom: 16px;
+    letter-spacing: 0.5px;
+    font-variant-numeric: tabular-nums;
+}
+
+.year-percent {
+    font-family: var(--font-mono);
+    font-size: clamp(36px, 10vw, 64px);
+    font-weight: 700;
+    letter-spacing: -1px;
+    margin-bottom: 20px;
+    font-variant-numeric: tabular-nums;
+}
+
+.progress-bar-wrapper {
+    width: 100%;
+    height: 8px;
+    background-color: #1a1a1a;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 16px;
+}
+
+.progress-bar {
+    height: 100%;
+    background-color: var(--text-primary);
+    border-radius: 4px;
+    width: 0%;
+    transition: width 1s ease;
+}
+
+.year-details {
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.8;
+    letter-spacing: 0.5px;
+}
+
+/* Divider between tools */
+.tool-divider {
+    width: 40px;
+    height: 1px;
+    background-color: #333;
+    margin: 0 auto;
+}
+
+/* Responsive adjustments for tools */
+@media (max-width: 400px) {
+    .input-group {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .input-group input[type="date"],
+    .input-group input[type="time"] {
+        width: 100%;
+    }
+    .preset-buttons {
+        flex-direction: column;
+    }
+    .preset-btn {
+        width: 100%;
+        text-align: center;
+    }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    .progress-bar {
+        transition: none;
+    }
+    .tools-container {
+        animation: none;
+    }
+}
