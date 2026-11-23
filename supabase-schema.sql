@@ -1,9 +1,40 @@
 -- supabase-schema.sql
--- PROJECT 24 — PREMIUM THEME MONETIZATION SYSTEM
+-- PROJECT 24 — AUTHENTICATION, SINGLE DEVICE SESSIONS & THEME MONETIZATION
 -- Production PostgreSQL Schema & Row Level Security Policies
 
 -- Enable UUID extension
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+-- 0. Users Table (Permanent User ID and Profile)
+CREATE TABLE IF NOT EXISTS public.users (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id TEXT UNIQUE NOT NULL, -- e.g. P24-USR-A3F8B1C2
+    email TEXT UNIQUE NOT NULL,
+    name TEXT NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT timezone('utc'::text, now()) NOT NULL,
+    updated_at TIMESTAMPTZ DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- 0b. User Sessions Table (Strict Single Device Enforcement)
+CREATE TABLE IF NOT EXISTS public.user_sessions (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id TEXT NOT NULL REFERENCES public.users(user_id) ON DELETE CASCADE,
+    device_id TEXT NOT NULL,
+    session_token TEXT UNIQUE NOT NULL,
+    user_agent TEXT,
+    created_at TIMESTAMPTZ DEFAULT timezone('utc'::text, now()) NOT NULL,
+    last_active TIMESTAMPTZ DEFAULT timezone('utc'::text, now()) NOT NULL,
+    CONSTRAINT single_active_user_session UNIQUE (user_id) -- ENFORCES SINGLE ACTIVE SESSION PER USER
+);
+
+-- 0c. OTP Verification Table
+CREATE TABLE IF NOT EXISTS public.otps (
+    email TEXT PRIMARY KEY,
+    otp_code TEXT NOT NULL,
+    expires_at TIMESTAMPTZ NOT NULL,
+    attempts INTEGER DEFAULT 0 NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT timezone('utc'::text, now()) NOT NULL
+);
 
 -- 1. Devices Table: Associates installation identifiers with client profiles
 CREATE TABLE IF NOT EXISTS public.devices (

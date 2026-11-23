@@ -1,0 +1,18 @@
+{
+  "users": [],
+  "otps": {
+    "aryan.tester@example.com": {
+      "otp": "299557",
+      "expiresAt": 1795456250853,
+      "attempts": 0,
+      "deviceId": "dev-device-alpha-111"
+    }
+  },
+  "rateLimits": {
+    "aryan.tester@example.com": {
+      "count": 1,
+      "firstReq": 1795455650853,
+      "lastReq": 1795455650853
+    }
+  }
+}
