@@ -3,8 +3,8 @@
     {
       "id": "681be843-fa5d-4365-afc9-226474f7cd3e",
       "userId": "P24-USR-C808FBF6",
-      "email": "aryan.tester@example.com",
-      "name": "Aryan tester",
+      "email": "[EMAIL_ADDRESS]",
+      "name": "Aryan Pandey",
       "createdAt": "2026-11-23T17:47:57.142Z",
       "activeSession": {
         "token": "9ef68c2b4e7ddea78589a12cbe23c33f9c93b6879524c6caff3298f1d13d473b",
@@ -17,7 +17,7 @@
   ],
   "otps": {},
   "rateLimits": {
-    "aryan.tester@example.com": {
+    "[EMAIL_ADDRESS]": {
       "count": 1,
       "firstReq": 1795456097014,
       "lastReq": 1795456097014
