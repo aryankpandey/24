@@ -1,4 +1,4 @@
-const CACHE_NAME = '24-cache-v5';
+const CACHE_NAME = '24-cache-v6';
 const urlsToCache = [
     './',
     './index.html',
@@ -11,13 +11,20 @@ const urlsToCache = [
     './focus-mode.html',
     './life-moments.html',
     './settings.html',
+    './admin.html',
     './style.css',
     './script.js',
+    './settings.js',
+    './admin.js',
+    './theme-manager.js',
+    './storage-service.js',
+    './supabase-config.js',
     './tools.js',
     './utils.js',
     './manifest.json',
     './icons/icon-192.svg',
-    './icons/icon-512.svg'
+    './icons/icon-512.svg',
+    './icons/upi-qr.png'
 ];
 
 self.addEventListener('install', event => {

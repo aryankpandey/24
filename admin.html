@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>24 – Administrator Dashboard</title>
+    <meta name="robots" content="noindex, nofollow" />
+    <link rel="stylesheet" href="style.css" />
+    <link rel="icon" href="icons/icon-192.svg" type="image/svg+xml" />
+    <meta name="theme-color" content="#050505" />
+    <script src="theme-manager.js"></script>
+    <script src="supabase-config.js"></script>
+    <script src="storage-service.js"></script>
+</head>
+<body class="admin-page">
+    <!-- Admin Authentication Gate -->
+    <div id="adminAuthOverlay" class="payment-modal-overlay active" style="z-index: 5000;">
+        <div class="payment-modal-card" style="max-width: 360px; text-align: center;">
+            <div style="font-size: 24px; font-weight: 700; margin-bottom: 8px;">24 Admin</div>
+            <p style="font-size: 13px; color: #888888; margin-bottom: 20px;">Enter administrator passcode to access payment verification and entitlement controls.</p>
+            <form id="adminAuthForm">
+                <input type="password" id="adminPassInput" class="form-input" placeholder="Passcode (default: 24admin)" style="width: 100%; text-align: center; margin-bottom: 12px;" required autofocus />
+                <div id="adminAuthAlert" style="display: none; color: #f87171; font-size: 12px; margin-bottom: 12px;"></div>
+                <button type="submit" class="btn-submit-payment" style="width: 100%;">Unlock Admin Dashboard</button>
+            </form>
+            <div style="margin-top: 16px;">
+                <a href="index.html" style="font-size: 12px; color: #666; text-decoration: none;">&larr; Return to Home</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Admin Dashboard (hidden until authenticated) -->
+    <main id="adminMain" style="display: none;">
+        <header>
+            <div class="header-left">
+                <a href="settings.html" class="back-btn" aria-label="Back to settings">
+                    <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="19" y1="12" x2="5" y2="12"></line>
+                        <polyline points="12 19 5 12 12 5"></polyline>
+                    </svg>
+                </a>
+                <a href="index.html" class="logo-link"><h1 class="logo">24</h1></a>
+                <span style="font-size: 12px; font-weight: 700; letter-spacing: 2px; color: #e0e0e0; margin-left: 8px;">ADMIN</span>
+            </div>
+            <div>
+                <button id="adminLogoutBtn" class="btn-transfer-request" style="font-size: 11px;">Lock Session</button>
+            </div>
+        </header>
+
+        <section class="admin-container" style="padding: 24px 0;">
+            <div class="subtitle">MONETIZATION CONTROLS</div>
+            <h2 class="page-heading">Payment Verification & Entitlements</h2>
+
+            <!-- Metrics Overview Grid -->
+            <div class="admin-metrics-grid">
+                <div class="admin-metric-card">
+                    <div class="admin-metric-num" id="metricTotal">0</div>
+                    <div class="admin-metric-label">Total Requests</div>
+                </div>
+                <div class="admin-metric-card">
+                    <div class="admin-metric-num" id="metricPending" style="color: #fbbf24;">0</div>
+                    <div class="admin-metric-label">Pending Review</div>
+                </div>
+                <div class="admin-metric-card">
+                    <div class="admin-metric-num" id="metricApproved" style="color: #4ade80;">0</div>
+                    <div class="admin-metric-label">Approved</div>
+                </div>
+                <div class="admin-metric-card">
+                    <div class="admin-metric-num" id="metricRejected" style="color: #f87171;">0</div>
+                    <div class="admin-metric-label">Rejected</div>
+                </div>
+            </div>
+
+            <!-- Dashboard Navigation Tabs -->
+            <div class="admin-tabs">
+                <button class="admin-tab-btn active" id="tabRequests">Payment Requests</button>
+                <button class="admin-tab-btn" id="tabEntitlements">Active Entitlements</button>
+                <button class="admin-tab-btn" id="tabTransfers">Device Transfers</button>
+                <button class="admin-tab-btn" id="tabLogs">Audit Logs</button>
+            </div>
+
+            <!-- View 1: Payment Requests -->
+            <div id="viewRequests">
+                <div style="display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap;">
+                    <button class="admin-tab-btn active" id="filterAllBtn" style="font-size: 12px; padding: 4px 10px;">All</button>
+                    <button class="admin-tab-btn" id="filterPendingBtn" style="font-size: 12px; padding: 4px 10px;">Pending</button>
+                    <button class="admin-tab-btn" id="filterApprovedBtn" style="font-size: 12px; padding: 4px 10px;">Approved</button>
+                    <button class="admin-tab-btn" id="filterRejectedBtn" style="font-size: 12px; padding: 4px 10px;">Rejected</button>
+                </div>
+                <div class="admin-list-container" id="requestsList"></div>
+            </div>
+
+            <!-- View 2: Active Entitlements -->
+            <div id="viewEntitlements" style="display: none;">
+                <div class="admin-list-container" id="entitlementsList"></div>
+            </div>
+
+            <!-- View 3: Device Transfers -->
+            <div id="viewTransfers" style="display: none;">
+                <div class="admin-list-container" id="transfersList"></div>
+            </div>
+
+            <!-- View 4: Audit Logs -->
+            <div id="viewLogs" style="display: none;">
+                <div class="admin-list-container" id="logsList"></div>
+            </div>
+        </section>
+
+        <footer>
+            <p>You don't have 24 hours.</p>
+            <p>You have what's left.</p>
+        </footer>
+    </main>
+
+    <!-- Screenshot Zoom Lightbox Modal -->
+    <div id="imgZoomModal" class="img-zoom-modal" style="display: none;">
+        <img id="imgZoomTarget" alt="Enlarged Payment Screenshot" />
+    </div>
+
+    <script src="admin.js"></script>
+</body>
+</html>

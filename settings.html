@@ -4,12 +4,16 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>24 – Settings</title>
-    <meta name="description" content="Settings and preferences for Project 24." />
+    <meta name="description" content="Personalize themes, manage device registration, and view entitlements for Project 24." />
     <link rel="stylesheet" href="style.css" />
     <link rel="manifest" href="manifest.json" />
     <link rel="icon" href="icons/icon-192.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="icons/icon-192.svg" />
     <meta name="theme-color" content="#050505" />
+    <!-- Theme Engine loads synchronously in head to prevent FOUC -->
+    <script src="theme-manager.js"></script>
+    <script src="supabase-config.js"></script>
+    <script src="storage-service.js"></script>
 </head>
 <body class="settings-page">
     <main>
@@ -46,23 +50,57 @@
             <div class="subtitle">PREFERENCES</div>
             <h2 class="page-heading">Settings</h2>
 
+            <!-- Themes Collection Section -->
             <div class="settings-section">
                 <div class="settings-section-header">
                     <h3 class="settings-section-title">Themes</h3>
-                    <span class="settings-badge">DEFAULT</span>
+                    <span class="settings-badge">6 THEMES</span>
                 </div>
-                <p class="settings-desc">Project 24's minimalist dark identity. Additional curated themes will arrive in an upcoming update.</p>
+                <p class="settings-desc">Personalize your 24 interface. Free themes are immediately available. Premium themes unlock for 1 year per registered device upon manual UPI verification.</p>
                 
-                <div class="theme-card active">
-                    <div class="theme-info">
-                        <span class="theme-name">Dark</span>
-                        <span class="theme-status">Active</span>
+                <div class="themes-collection-grid" id="themesGrid">
+                    <!-- Populated dynamically by settings.js with all 6 themes -->
+                </div>
+            </div>
+
+            <!-- Device Registration & Entitlements Section -->
+            <div class="settings-section">
+                <div class="settings-section-header">
+                    <h3 class="settings-section-title">Device Registration</h3>
+                    <span class="settings-badge">DEVICE BOUND</span>
+                </div>
+                <p class="settings-desc">Premium theme activations are cryptographically associated with this unique installation identifier. If you switch devices, you can request an entitlement transfer.</p>
+                
+                <div class="device-box">
+                    <div style="font-size: 11px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 1px;">Current Installation ID</div>
+                    <div class="device-id-row">
+                        <span class="device-id-text" id="deviceIdDisplay">Detecting...</span>
+                        <button class="btn-icon-copy" id="copyDeviceBtn" aria-label="Copy Device ID" title="Copy Device ID">
+                            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                            </svg>
+                        </button>
                     </div>
-                    <div class="theme-swatch">
-                        <span class="swatch-color" style="background: #050505;"></span>
-                        <span class="swatch-color" style="background: #1a1a1a;"></span>
-                        <span class="swatch-color" style="background: #e0e0e0;"></span>
+
+                    <div style="margin-top: 6px;">
+                        <button class="btn-transfer-request" id="openTransferModalBtn">
+                            Request Device Transfer
+                        </button>
                     </div>
+                </div>
+            </div>
+
+            <!-- Payment Requests Live Status Section -->
+            <div class="settings-section">
+                <div class="settings-section-header">
+                    <h3 class="settings-section-title">Payment Verification Status</h3>
+                    <span class="settings-badge">MANUAL REVIEW</span>
+                </div>
+                <p class="settings-desc">Track the status of your submitted UPI payment verifications for this device.</p>
+                
+                <div class="user-requests-list" id="userRequestsList">
+                    <!-- Populated dynamically by settings.js -->
                 </div>
             </div>
         </section>
@@ -72,7 +110,131 @@
             <p>You have what's left.</p>
         </footer>
     </main>
+
+    <!-- Dedicated Premium Purchase Modal -->
+    <div class="payment-modal-overlay" id="paymentModal">
+        <div class="payment-modal-card">
+            <div class="payment-modal-header">
+                <h3 class="payment-modal-title">Unlock Premium Theme</h3>
+                <button class="close-btn" id="closePaymentModal" style="position: static; padding: 0;">&times;</button>
+            </div>
+
+            <div class="theme-summary-banner">
+                <div>
+                    <div class="theme-title" id="payThemeName">Theme Name</div>
+                    <div style="font-size: 12px; color: #888888; margin-top: 2px;">1-Year Access · Single Device</div>
+                </div>
+                <div class="theme-price" id="payThemePrice">₹29</div>
+            </div>
+
+            <!-- UPI QR Code Section -->
+            <div class="qr-section">
+                <div class="qr-image-wrapper">
+                    <!-- Exact original QR image supplied by user -->
+                    <img src="icons/upi-qr.png" alt="UPI Payment QR Code" id="upiQrImage" />
+                </div>
+                <div style="font-size: 13px; color: #aaaaaa; margin-bottom: 8px;">Scan with Google Pay, PhonePe, Paytm, or any UPI app</div>
+            </div>
+
+            <!-- UPI Details Card -->
+            <div class="upi-details-card">
+                <div class="upi-row">
+                    <span class="label">Payee Name</span>
+                    <span style="font-weight: 600; color: #ffffff;">ARYAN PANDEY</span>
+                </div>
+                <div class="upi-row">
+                    <span class="label">UPI ID</span>
+                    <div class="upi-id-copy-group">
+                        <code id="upiIdText">aryanpandey7161-1@oksbi</code>
+                        <button class="btn-icon-copy" id="copyUpiBtn" aria-label="Copy UPI ID" title="Copy UPI ID">
+                            <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <div class="upi-row">
+                    <span class="label">Amount</span>
+                    <span style="font-weight: 700; color: #4ade80;">₹29.00</span>
+                </div>
+            </div>
+
+            <!-- Open UPI App Link -->
+            <a href="upi://pay?pa=aryanpandey7161-1@oksbi&pn=ARYAN%20PANDEY&am=29&cu=INR&tn=Project%2024%20Theme" class="btn-open-upi" id="upiPayLink">
+                <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
+                Pay via Installed UPI App
+            </a>
+
+            <!-- Payment Disclaimer -->
+            <div class="payment-disclaimer">
+                <strong>Manual Verification:</strong> Your payment will be verified manually. Your premium theme will be activated after admin approval.
+            </div>
+
+            <!-- Payment Submission Form -->
+            <form class="payment-form" id="paymentForm">
+                <input type="hidden" id="payThemeId" />
+
+                <div class="form-field">
+                    <label class="form-label">Registered Device ID</label>
+                    <div class="form-input" style="color: #777777; background: #0d0d0d; font-size: 12px;" id="payDeviceIdDisplay">-</div>
+                </div>
+
+                <div class="form-field">
+                    <label class="form-label" for="utrInput">Transaction Reference / UTR Number *</label>
+                    <input type="text" id="utrInput" class="form-input" placeholder="e.g. 423512345678" required autocomplete="off" />
+                    <span style="font-size: 11px; color: #777777;">12-digit UPI reference or bank transaction ID</span>
+                </div>
+
+                <div class="form-field">
+                    <label class="form-label" for="screenshotInput">Payment Screenshot *</label>
+                    <label class="screenshot-dropzone" for="screenshotInput">
+                        <div style="font-size: 13px; color: #bbbbbb;">Tap to upload payment screenshot</div>
+                        <div style="font-size: 11px; color: #666666; margin-top: 4px;">JPEG, PNG, WebP up to 5MB</div>
+                        <input type="file" id="screenshotInput" accept="image/*" style="display: none;" required />
+                        <img id="screenshotPreview" class="screenshot-preview" alt="Screenshot Preview" />
+                    </label>
+                </div>
+
+                <div id="paymentAlert" style="display: none;"></div>
+
+                <button type="submit" class="btn-submit-payment" id="submitPaymentBtn">
+                    Submit Payment Verification
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Device Transfer Modal -->
+    <div class="payment-modal-overlay" id="transferModal">
+        <div class="payment-modal-card">
+            <div class="payment-modal-header">
+                <h3 class="payment-modal-title">Device Transfer Request</h3>
+                <button class="close-btn" id="closeTransferModal" style="position: static; padding: 0;">&times;</button>
+            </div>
+            <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 16px;">
+                Transfer an active theme entitlement from this device to a new device. Once approved by the administrator, the theme will unlock on the new device and revoke on this one, preserving your original expiration date.
+            </p>
+            <form class="payment-form" id="transferForm">
+                <div class="form-field">
+                    <label class="form-label" for="transferThemeSelect">Select Entitlement to Transfer *</label>
+                    <select id="transferThemeSelect" class="form-input" style="background-color: #161616; color: #fff;"></select>
+                </div>
+                <div class="form-field">
+                    <label class="form-label" for="transferNewDeviceId">Target Device ID *</label>
+                    <input type="text" id="transferNewDeviceId" class="form-input" placeholder="e.g. P24-XXXXXXXX" required />
+                    <span style="font-size: 11px; color: #777;">Find this on the new phone's Settings page</span>
+                </div>
+                <div id="transferAlert" style="display: none;"></div>
+                <button type="submit" class="btn-submit-payment">
+                    Submit Transfer Request
+                </button>
+            </form>
+        </div>
+    </div>
+
     <script src="script.js"></script>
+    <script src="settings.js"></script>
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
