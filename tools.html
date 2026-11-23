@@ -3,15 +3,15 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>24 – Tools</title>
-    <meta name="description" content="Time tools from 24 – Hours Left countdown and Year Progress tracker." />
+    <title>24 – Try More Tools</title>
+    <meta name="description" content="Central directory of minimalist time, focus, and life tools from Project 24." />
     <link rel="stylesheet" href="style.css" />
     <link rel="manifest" href="manifest.json" />
     <link rel="icon" href="icons/icon-192.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="icons/icon-192.svg" />
     <meta name="theme-color" content="#050505" />
 </head>
-<body class="tools-page">
+<body class="tools-directory-page">
     <main>
         <header>
             <div class="header-left">
@@ -30,7 +30,6 @@
             </div>
         </header>
 
-        <!-- Reuse the same overlay menu -->
         <div class="menu-overlay" id="menuOverlay">
             <div class="menu-content">
                 <button class="close-btn" id="closeBtn" aria-label="Close menu">&times;</button>
@@ -38,46 +37,117 @@
                     <a href="about.html" class="menu-nav-link" id="tabAbout">About Us</a>
                     <a href="contact.html" class="menu-nav-link" id="tabContact">Contact Us</a>
                     <a href="tools.html" class="menu-nav-link active" id="tabTools">Try More Tools</a>
+                    <a href="settings.html" class="menu-nav-link" id="tabSettings">Settings</a>
                 </nav>
             </div>
         </div>
 
-        <section class="tools-container">
-            <!-- Hours Left -->
-            <div>
-                <h2 class="subtitle">HOURS LEFT</h2>
-                <div class="tool hours-left">
-                    <p class="tool-desc">Calculate time remaining until a future moment.</p>
-                    <div class="preset-buttons">
-                        <button class="preset-btn" data-offset="1" id="presetTomorrow">Tomorrow</button>
-                        <button class="preset-btn" data-offset="7" id="preset7Days">7 Days</button>
-                        <button class="preset-btn" data-offset="30" id="preset30Days">30 Days</button>
-                    </div>
-                    <div class="input-group">
-                        <label for="targetDate">Date</label>
-                        <input type="date" id="targetDate" aria-label="Target date" />
-                        <label for="targetTime">Time</label>
-                        <input type="time" id="targetTime" aria-label="Target time" />
-                    </div>
-                    <div class="result" id="hoursResult">--</div>
-                    <button class="reset-btn" id="resetHours">Reset</button>
-                </div>
-            </div>
+        <section class="tools-directory-container">
+            <div class="subtitle">DIRECTORY</div>
+            <h2 class="page-heading">Try More Tools</h2>
+            <p class="directory-desc">Explore minimalist tools designed for time awareness, focus, and personal reflection.</p>
 
-            <div class="tool-divider"></div>
-
-            <!-- Year Progress -->
-            <div>
-                <h2 class="subtitle">YEAR PROGRESS</h2>
-                <div class="tool year-progress">
-                    <p class="tool-desc">How much of the current year has passed.</p>
-                    <div class="year-percent" id="yearPercent">--</div>
-                    <div class="progress-bar-wrapper">
-                        <div class="progress-bar" id="yearBar"></div>
+            <div class="tools-directory-grid">
+                <!-- Tool 01: Year Tracker -->
+                <a href="year-tracker.html" class="tool-card">
+                    <div class="tool-card-icon">
+                        <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="16" y1="2" x2="16" y2="6"></line>
+                            <line x1="8" y1="2" x2="8" y2="6"></line>
+                            <line x1="3" y1="10" x2="21" y2="10"></line>
+                        </svg>
                     </div>
-                    <div class="year-info" id="yearInfo">--</div>
-                    <div class="year-details" id="yearDetails"></div>
-                </div>
+                    <div class="tool-card-content">
+                        <div class="tool-card-meta">TOOL 01</div>
+                        <h3 class="tool-card-title">Year Tracker</h3>
+                        <p class="tool-card-desc">Displays the progress of the current calendar year with days elapsed and remaining.</p>
+                    </div>
+                    <div class="tool-card-arrow">
+                        <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="9 18 15 12 9 6"></polyline>
+                        </svg>
+                    </div>
+                </a>
+
+                <!-- Tool 02: Date & Time Countdown -->
+                <a href="countdown.html" class="tool-card">
+                    <div class="tool-card-icon">
+                        <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <polyline points="12 6 12 12 16 14"></polyline>
+                        </svg>
+                    </div>
+                    <div class="tool-card-content">
+                        <div class="tool-card-meta">TOOL 02</div>
+                        <h3 class="tool-card-title">Date & Time Countdown</h3>
+                        <p class="tool-card-desc">Calculate precise time remaining until a future date and time of your choice.</p>
+                    </div>
+                    <div class="tool-card-arrow">
+                        <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="9 18 15 12 9 6"></polyline>
+                        </svg>
+                    </div>
+                </a>
+
+                <!-- Tool 03: Goal Reminder -->
+                <a href="goal-reminder.html" class="tool-card">
+                    <div class="tool-card-icon">
+                        <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <circle cx="12" cy="12" r="6"></circle>
+                            <circle cx="12" cy="12" r="2"></circle>
+                        </svg>
+                    </div>
+                    <div class="tool-card-content">
+                        <div class="tool-card-meta">TOOL 03</div>
+                        <h3 class="tool-card-title">Goal Reminder</h3>
+                        <p class="tool-card-desc">A dedicated space for users to manage personal goals and reminders.</p>
+                    </div>
+                    <div class="tool-card-arrow">
+                        <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="9 18 15 12 9 6"></polyline>
+                        </svg>
+                    </div>
+                </a>
+
+                <!-- Tool 04: Focus Mode -->
+                <a href="focus-mode.html" class="tool-card">
+                    <div class="tool-card-icon">
+                        <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83"></path>
+                        </svg>
+                    </div>
+                    <div class="tool-card-content">
+                        <div class="tool-card-meta">TOOL 04</div>
+                        <h3 class="tool-card-title">Focus Mode</h3>
+                        <p class="tool-card-desc">A dedicated space for focused work and concentration.</p>
+                    </div>
+                    <div class="tool-card-arrow">
+                        <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="9 18 15 12 9 6"></polyline>
+                        </svg>
+                    </div>
+                </a>
+
+                <!-- Tool 05: Life Moments -->
+                <a href="life-moments.html" class="tool-card">
+                    <div class="tool-card-icon">
+                        <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+                        </svg>
+                    </div>
+                    <div class="tool-card-content">
+                        <div class="tool-card-meta">TOOL 05</div>
+                        <h3 class="tool-card-title">Life Moments</h3>
+                        <p class="tool-card-desc">A dedicated space for meaningful personal moments and milestones.</p>
+                    </div>
+                    <div class="tool-card-arrow">
+                        <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="9 18 15 12 9 6"></polyline>
+                        </svg>
+                    </div>
+                </a>
             </div>
         </section>
 
@@ -87,7 +157,6 @@
         </footer>
     </main>
     <script src="script.js"></script>
-    <script type="module" src="tools.js"></script>
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {

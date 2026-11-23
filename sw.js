@@ -1,10 +1,16 @@
-const CACHE_NAME = '24-cache-v4';
+const CACHE_NAME = '24-cache-v5';
 const urlsToCache = [
     './',
     './index.html',
     './about.html',
     './contact.html',
     './tools.html',
+    './year-tracker.html',
+    './countdown.html',
+    './goal-reminder.html',
+    './focus-mode.html',
+    './life-moments.html',
+    './settings.html',
     './style.css',
     './script.js',
     './tools.js',

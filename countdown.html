@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>24 – Date & Time Countdown</title>
+    <meta name="description" content="Calculate time remaining until a future moment." />
+    <link rel="stylesheet" href="style.css" />
+    <link rel="manifest" href="manifest.json" />
+    <link rel="icon" href="icons/icon-192.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="icons/icon-192.svg" />
+    <meta name="theme-color" content="#050505" />
+</head>
+<body class="tool-detail-page">
+    <main>
+        <header>
+            <div class="header-left">
+                <a href="tools.html" class="back-btn" id="backBtn" aria-label="Back to tools">
+                    <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="19" y1="12" x2="5" y2="12"></line>
+                        <polyline points="12 19 5 12 12 5"></polyline>
+                    </svg>
+                </a>
+                <a href="index.html" class="logo-link" aria-label="Back to home"><h1 class="logo">24</h1></a>
+            </div>
+            <div class="menu-btn" id="menuBtn" aria-label="Open menu">
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+            </div>
+        </header>
+
+        <div class="menu-overlay" id="menuOverlay">
+            <div class="menu-content">
+                <button class="close-btn" id="closeBtn" aria-label="Close menu">&times;</button>
+                <nav class="menu-nav">
+                    <a href="about.html" class="menu-nav-link" id="tabAbout">About Us</a>
+                    <a href="contact.html" class="menu-nav-link" id="tabContact">Contact Us</a>
+                    <a href="tools.html" class="menu-nav-link" id="tabTools">Try More Tools</a>
+                    <a href="settings.html" class="menu-nav-link" id="tabSettings">Settings</a>
+                </nav>
+            </div>
+        </div>
+
+        <section class="tool-page-container">
+            <div class="subtitle">TOOL 02 · COUNTDOWN</div>
+            <h2 class="page-heading">Date & Time Countdown</h2>
+            <div class="tool hours-left">
+                <p class="tool-desc">Calculate time remaining until a future moment.</p>
+                <div class="preset-buttons">
+                    <button class="preset-btn" data-offset="1" id="presetTomorrow">Tomorrow</button>
+                    <button class="preset-btn" data-offset="7" id="preset7Days">7 Days</button>
+                    <button class="preset-btn" data-offset="30" id="preset30Days">30 Days</button>
+                </div>
+                <div class="input-group">
+                    <label for="targetDate">Date</label>
+                    <input type="date" id="targetDate" aria-label="Target date" />
+                    <label for="targetTime">Time</label>
+                    <input type="time" id="targetTime" aria-label="Target time" />
+                </div>
+                <div class="result" id="hoursResult">--</div>
+                <button class="reset-btn" id="resetHours">Reset</button>
+            </div>
+        </section>
+
+        <footer>
+            <p>You don't have 24 hours.</p>
+            <p>You have what's left.</p>
+        </footer>
+    </main>
+    <script src="script.js"></script>
+    <script type="module" src="tools.js"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js').catch(err => {
+                    console.error('ServiceWorker registration failed: ', err);
+                });
+            });
+        }
+    </script>
+</body>
+</html>

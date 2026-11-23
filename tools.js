@@ -8,7 +8,7 @@ import {
 } from './utils.js';
 
 // =============================================
-// HOURS LEFT
+// HOURS LEFT (COUNTDOWN)
 // =============================================
 const targetDateInput = document.getElementById('targetDate');
 const targetTimeInput = document.getElementById('targetTime');
@@ -24,11 +24,12 @@ let lastHoursRender = '';
  * Avoids ambiguous Date.parse by using component constructor.
  */
 function buildTargetDate() {
+  if (!targetDateInput) return null;
   const dateVal = targetDateInput.value; // "YYYY-MM-DD"
   if (!dateVal) return null;
 
   const [y, mo, d] = dateVal.split('-').map(Number);
-  const timeVal = targetTimeInput.value; // "HH:MM" or ""
+  const timeVal = targetTimeInput ? targetTimeInput.value : ''; // "HH:MM" or ""
   let h = 0, mi = 0;
   if (timeVal) {
     const parts = timeVal.split(':').map(Number);
@@ -39,6 +40,7 @@ function buildTargetDate() {
 }
 
 function renderHoursCountdown() {
+  if (!hoursResultEl) return;
   const target = buildTargetDate();
   if (!target) {
     hoursResultEl.textContent = '--';
@@ -69,25 +71,10 @@ function renderHoursCountdown() {
 }
 
 function hoursLoop() {
+  if (!hoursResultEl) return;
   renderHoursCountdown();
   hoursAnimId = requestAnimationFrame(hoursLoop);
 }
-
-// Preset buttons set date and kick off the loop
-presetButtons.forEach(btn => {
-  btn.addEventListener('click', () => {
-    const offset = Number(btn.dataset.offset);
-    const now = new Date();
-    const future = new Date(now.getFullYear(), now.getMonth(), now.getDate() + offset, 0, 0, 0, 0);
-    // Format as YYYY-MM-DD for the input
-    const yyyy = future.getFullYear();
-    const mm = String(future.getMonth() + 1).padStart(2, '0');
-    const dd = String(future.getDate()).padStart(2, '0');
-    targetDateInput.value = `${yyyy}-${mm}-${dd}`;
-    targetTimeInput.value = '';
-    startHoursLoop();
-  });
-});
 
 function startHoursLoop() {
   lastHoursRender = '';
@@ -97,19 +84,41 @@ function startHoursLoop() {
   }
 }
 
-targetDateInput.addEventListener('change', startHoursLoop);
-targetTimeInput.addEventListener('change', startHoursLoop);
+if (targetDateInput && hoursResultEl) {
+  // Preset buttons set date and kick off the loop
+  presetButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const offset = Number(btn.dataset.offset);
+      const now = new Date();
+      const future = new Date(now.getFullYear(), now.getMonth(), now.getDate() + offset, 0, 0, 0, 0);
+      const yyyy = future.getFullYear();
+      const mm = String(future.getMonth() + 1).padStart(2, '0');
+      const dd = String(future.getDate()).padStart(2, '0');
+      targetDateInput.value = `${yyyy}-${mm}-${dd}`;
+      if (targetTimeInput) targetTimeInput.value = '';
+      startHoursLoop();
+    });
+  });
 
-resetBtn.addEventListener('click', () => {
-  targetDateInput.value = '';
-  targetTimeInput.value = '';
-  hoursResultEl.textContent = '--';
-  hoursResultEl.classList.remove('past');
-  lastHoursRender = '--';
-});
+  targetDateInput.addEventListener('change', startHoursLoop);
+  if (targetTimeInput) targetTimeInput.addEventListener('change', startHoursLoop);
+
+  if (resetBtn) {
+    resetBtn.addEventListener('click', () => {
+      targetDateInput.value = '';
+      if (targetTimeInput) targetTimeInput.value = '';
+      hoursResultEl.textContent = '--';
+      hoursResultEl.classList.remove('past');
+      lastHoursRender = '--';
+    });
+  }
+
+  // Start hours loop if element is present
+  hoursLoop();
+}
 
 // =============================================
-// YEAR PROGRESS
+// YEAR PROGRESS (YEAR TRACKER)
 // =============================================
 const yearPercentEl = document.getElementById('yearPercent');
 const yearBarEl     = document.getElementById('yearBar');
@@ -119,6 +128,7 @@ const yearDetailsEl = document.getElementById('yearDetails');
 let lastYearRender = '';
 
 function updateYearProgress() {
+  if (!yearPercentEl || !yearBarEl) return;
   const now   = new Date();
   const year  = now.getFullYear();
   const start = getStartOfYear(now);
@@ -139,13 +149,23 @@ function updateYearProgress() {
   yearPercentEl.textContent = `${percent.toFixed(1)}%`;
   yearBarEl.style.width = `${percent}%`;
 
-  yearInfoEl.textContent = `${formatDateLong(now)} · ${year}${isLeapYear(year) ? ' (LEAP)' : ''}`;
-  yearDetailsEl.textContent = `${daysElapsed} days elapsed · ${daysRemaining} days remaining`;
+  if (yearInfoEl) {
+    yearInfoEl.textContent = `${formatDateLong(now)} · ${year}${isLeapYear(year) ? ' (LEAP)' : ''}`;
+  }
+  if (yearDetailsEl) {
+    yearDetailsEl.textContent = `${daysElapsed} days elapsed · ${daysRemaining} days remaining`;
+  }
 }
 
 function yearLoop() {
+  if (!yearPercentEl) return;
   updateYearProgress();
   requestAnimationFrame(yearLoop);
+}
+
+if (yearPercentEl && yearBarEl) {
+  // Start year loop if element is present
+  yearLoop();
 }
 
 // Handle visibility change – force re-render on tab return
@@ -155,7 +175,3 @@ document.addEventListener('visibilitychange', () => {
     lastYearRender = '';
   }
 });
-
-// Start both loops
-hoursLoop();
-yearLoop();

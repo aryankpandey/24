@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>24 – Settings</title>
+    <meta name="description" content="Settings and preferences for Project 24." />
+    <link rel="stylesheet" href="style.css" />
+    <link rel="manifest" href="manifest.json" />
+    <link rel="icon" href="icons/icon-192.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="icons/icon-192.svg" />
+    <meta name="theme-color" content="#050505" />
+</head>
+<body class="settings-page">
+    <main>
+        <header>
+            <div class="header-left">
+                <a href="index.html" class="back-btn" id="backBtn" aria-label="Back to home">
+                    <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="19" y1="12" x2="5" y2="12"></line>
+                        <polyline points="12 19 5 12 12 5"></polyline>
+                    </svg>
+                </a>
+                <a href="index.html" class="logo-link" aria-label="Back to home"><h1 class="logo">24</h1></a>
+            </div>
+            <div class="menu-btn" id="menuBtn" aria-label="Open menu">
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+            </div>
+        </header>
+
+        <div class="menu-overlay" id="menuOverlay">
+            <div class="menu-content">
+                <button class="close-btn" id="closeBtn" aria-label="Close menu">&times;</button>
+                <nav class="menu-nav">
+                    <a href="about.html" class="menu-nav-link" id="tabAbout">About Us</a>
+                    <a href="contact.html" class="menu-nav-link" id="tabContact">Contact Us</a>
+                    <a href="tools.html" class="menu-nav-link" id="tabTools">Try More Tools</a>
+                    <a href="settings.html" class="menu-nav-link active" id="tabSettings">Settings</a>
+                </nav>
+            </div>
+        </div>
+
+        <section class="settings-container">
+            <div class="subtitle">PREFERENCES</div>
+            <h2 class="page-heading">Settings</h2>
+
+            <div class="settings-section">
+                <div class="settings-section-header">
+                    <h3 class="settings-section-title">Themes</h3>
+                    <span class="settings-badge">DEFAULT</span>
+                </div>
+                <p class="settings-desc">Project 24's minimalist dark identity. Additional curated themes will arrive in an upcoming update.</p>
+                
+                <div class="theme-card active">
+                    <div class="theme-info">
+                        <span class="theme-name">Dark</span>
+                        <span class="theme-status">Active</span>
+                    </div>
+                    <div class="theme-swatch">
+                        <span class="swatch-color" style="background: #050505;"></span>
+                        <span class="swatch-color" style="background: #1a1a1a;"></span>
+                        <span class="swatch-color" style="background: #e0e0e0;"></span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <footer>
+            <p>You don't have 24 hours.</p>
+            <p>You have what's left.</p>
+        </footer>
+    </main>
+    <script src="script.js"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js').catch(err => {
+                    console.error('ServiceWorker registration failed: ', err);
+                });
+            });
+        }
+    </script>
+</body>
+</html>
