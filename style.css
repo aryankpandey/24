@@ -49,6 +49,33 @@ header {
     width: 100%;
 }
 
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.back-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-secondary);
+    text-decoration: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    transition: color 0.2s ease, background-color 0.2s ease;
+}
+
+.back-btn:hover {
+    color: var(--text-primary);
+    background-color: #1a1a1a;
+}
+
+.back-btn svg {
+    display: block;
+}
+
 .logo {
     font-size: 24px;
     font-weight: 600;
@@ -237,6 +264,36 @@ body.state-warning .countdown {
     border-radius: 2px;
 }
 
+/* Menu Navigation Links */
+.menu-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.menu-nav-link {
+    display: block;
+    color: var(--text-secondary);
+    font-size: 16px;
+    font-weight: 600;
+    text-decoration: none;
+    padding: 12px 16px;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    font-family: var(--font-sans);
+}
+
+.menu-nav-link:hover {
+    color: var(--text-primary);
+    background-color: #1a1a1a;
+}
+
+.menu-nav-link.active {
+    color: var(--text-primary);
+    background-color: #1a1a1a;
+    border-left: 2px solid var(--text-primary);
+}
+
 .tab-pane {
     display: none;
     animation: fadeIn 0.3s ease;
@@ -303,6 +360,56 @@ body.state-warning .countdown {
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(10px); }
     to { opacity: 1; transform: translateY(0); }
+}
+
+/* Dedicated Full-Screen Pages (About & Contact) */
+body.about-page,
+body.contact-page {
+    overflow: auto;
+}
+
+.page-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    flex-grow: 1;
+    width: 100%;
+    padding: 32px 0;
+    animation: fadeIn 0.4s ease;
+}
+
+.about-container {
+    max-width: 480px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.page-heading {
+    font-size: clamp(28px, 6vw, 36px);
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 24px;
+    letter-spacing: -0.5px;
+}
+
+.page-text {
+    font-size: 16px;
+    line-height: 1.8;
+    color: var(--text-secondary);
+    font-weight: 400;
+}
+
+.contact-container {
+    max-width: 400px;
+    margin: 0 auto;
+    text-align: center;
+    width: 100%;
+}
+
+.contact-container .social-links {
+    width: 100%;
+    margin-top: 8px;
 }
 
 /* ===== Tools Page ===== */

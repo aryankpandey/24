@@ -89,67 +89,91 @@ if (countdownEl) {
     requestAnimationFrame(update);
 }
 
-// Menu Interaction Logic
+// Menu & Navigation Interaction Logic
 const menuBtn = document.getElementById('menuBtn');
 const menuOverlay = document.getElementById('menuOverlay');
 const closeBtn = document.getElementById('closeBtn');
-const tabAbout = document.getElementById('tabAbout');
-const tabContact = document.getElementById('tabContact');
-const tabTools = document.getElementById('tabTools');
-const paneAbout = document.getElementById('paneAbout');
-const paneContact = document.getElementById('paneContact');
+const backBtn = document.getElementById('backBtn');
+
+function openMenu() {
+    if (menuOverlay) {
+        menuOverlay.classList.add('active');
+        // Push state for Android native back button handling
+        try {
+            history.pushState({ menuOpen: true }, '');
+        } catch (e) {
+            // fallback if pushState is restricted
+        }
+    }
+}
+
+function closeMenu(skipHistory = false) {
+    if (menuOverlay && menuOverlay.classList.contains('active')) {
+        menuOverlay.classList.remove('active');
+        if (!skipHistory && history.state && history.state.menuOpen) {
+            history.back();
+        }
+    }
+}
 
 if (menuBtn) {
-    menuBtn.addEventListener('click', () => {
-        menuOverlay.classList.add('active');
-    });
+    menuBtn.addEventListener('click', openMenu);
 }
 
 if (closeBtn) {
-    closeBtn.addEventListener('click', () => {
-        menuOverlay.classList.remove('active');
-    });
+    closeBtn.addEventListener('click', () => closeMenu());
 }
 
 // Close overlay when clicking outside the content box
 if (menuOverlay) {
     menuOverlay.addEventListener('click', (e) => {
         if (e.target === menuOverlay) {
-            menuOverlay.classList.remove('active');
+            closeMenu();
         }
     });
 }
 
-if (tabAbout) {
-    tabAbout.addEventListener('click', () => {
-        tabAbout.classList.add('active');
-        tabContact.classList.remove('active');
-        tabTools && tabTools.classList.remove('active');
-        paneAbout && paneAbout.classList.add('active');
-        paneContact && paneContact.classList.remove('active');
+// Android native back button & browser back navigation handling
+window.addEventListener('popstate', (e) => {
+    if (menuOverlay && menuOverlay.classList.contains('active')) {
+        menuOverlay.classList.remove('active');
+    }
+});
+
+// Close menu on Escape key
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && menuOverlay && menuOverlay.classList.contains('active')) {
+        closeMenu();
+    }
+});
+
+// Back navigation button handling
+if (backBtn) {
+    backBtn.addEventListener('click', (e) => {
+        if (window.history.length > 1 && document.referrer && document.referrer.includes(window.location.host)) {
+            e.preventDefault();
+            window.history.back();
+        }
     });
 }
 
-if (tabContact) {
-    tabContact.addEventListener('click', () => {
-        tabContact.classList.add('active');
-        tabAbout.classList.remove('active');
-        tabTools && tabTools.classList.remove('active');
-        paneContact && paneContact.classList.add('active');
-        paneAbout && paneAbout.classList.remove('active');
-    });
-}
-
-// Tools navigation — navigate to tools.html; on tools page, just close menu
-if (tabTools) {
-    const isToolsPage = document.body.classList.contains('tools-page');
-    tabTools.addEventListener('click', () => {
-        if (isToolsPage) {
-            menuOverlay && menuOverlay.classList.remove('active');
+// Menu links navigation handling
+document.querySelectorAll('.menu-nav-link').forEach(link => {
+    link.addEventListener('click', (e) => {
+        const href = link.getAttribute('href');
+        const currentPath = window.location.pathname;
+        const currentPage = currentPath.substring(currentPath.lastIndexOf('/') + 1) || 'index.html';
+        
+        // If clicking current page, close menu without unnecessary reload
+        if (href === currentPage || (href === 'index.html' && (currentPage === '' || currentPage === 'index.html'))) {
+            e.preventDefault();
+            closeMenu();
         } else {
-            menuOverlay && menuOverlay.classList.remove('active');
-            window.location.href = 'tools.html';
+            // Closing menu state before navigating
+            if (menuOverlay) {
+                menuOverlay.classList.remove('active');
+            }
         }
     });
-}
+});
 
