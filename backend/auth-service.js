@@ -1,7 +1,7 @@
 // backend/auth-service.js
-// Core Server-Side Authentication & Super Admin Engine for Project 24
-// Enforces No-OTP User Registration, Permanent P24-XXXXXXXX User IDs,
-// Persistent Sessions, Exclusive Super Admin Authorization, and Audited Payment Workflows.
+// Core Server-Side Authentication Engine for Project 24
+// Enforces Email OTP verification, permanent User ID generation,
+// rate limiting, OTP expiry, and strict Single Device Session restrictions.
 
 const fs = require('fs');
 const path = require('path');
@@ -10,10 +10,7 @@ const crypto = require('crypto');
 const DATA_DIR = path.join(__dirname, '..', 'data');
 const DB_FILE = path.join(DATA_DIR, 'auth-db.json');
 
-const SUPER_ADMIN_EMAIL = 'aryanpandey7161@gmail.com';
-const SUPER_ADMIN_DEFAULT_PASS = process.env.SUPER_ADMIN_PASSWORD || '24admin';
-
-// Initialize JSON database if not present
+// Ensure database directory and file exist
 function initDb() {
     if (!fs.existsSync(DATA_DIR)) {
         fs.mkdirSync(DATA_DIR, { recursive: true });
@@ -21,10 +18,8 @@ function initDb() {
     if (!fs.existsSync(DB_FILE)) {
         const initialData = {
             users: [],
-            adminSessions: {},
-            paymentRequests: [],
-            entitlements: [],
-            auditLogs: []
+            otps: {},
+            rateLimits: {}
         };
         fs.writeFileSync(DB_FILE, JSON.stringify(initialData, null, 2), 'utf8');
     }
@@ -34,15 +29,9 @@ function readDb() {
     initDb();
     try {
         const raw = fs.readFileSync(DB_FILE, 'utf8');
-        const data = JSON.parse(raw);
-        if (!data.users) data.users = [];
-        if (!data.adminSessions) data.adminSessions = {};
-        if (!data.paymentRequests) data.paymentRequests = [];
-        if (!data.entitlements) data.entitlements = [];
-        if (!data.auditLogs) data.auditLogs = [];
-        return data;
+        return JSON.parse(raw);
     } catch (e) {
-        return { users: [], adminSessions: {}, paymentRequests: [], entitlements: [], auditLogs: [] };
+        return { users: [], otps: {}, rateLimits: {} };
     }
 }
 
@@ -51,425 +40,280 @@ function writeDb(data) {
     fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2), 'utf8');
 }
 
-// Generate permanent, unique Project 24 User ID: P24-XXXXXXXX
+// Generate permanent, unique User ID
 function generatePermanentUserId(existingUsers) {
     let userId = '';
     let isUnique = false;
-    let attempts = 0;
-    while (!isUnique && attempts < 100) {
-        attempts++;
+    while (!isUnique) {
         const rand = crypto.randomBytes(4).toString('hex').toUpperCase();
-        userId = `P24-${rand}`;
+        userId = `P24-USR-${rand}`;
         isUnique = !existingUsers.some(u => u.userId === userId);
     }
     return userId;
 }
 
-const AuthService = {
-    getSuperAdminEmail() {
-        return SUPER_ADMIN_EMAIL;
-    },
+// Mock/Real Email Sender helper
+async function sendEmailOtp(email, otp) {
+    // If SMTP credentials or Resend API key exist in environment, send real email
+    const resendKey = process.env.RESEND_API_KEY;
+    const smtpHost = process.env.SMTP_HOST;
 
-    // 1. NO-OTP User Registration
-    async registerUser({ fullName, mobileNumber, email, deviceId }) {
-        if (!fullName || typeof fullName !== 'string' || fullName.trim().length < 2) {
-            throw new Error('Please enter your full name (minimum 2 characters)');
+    if (resendKey) {
+        try {
+            const res = await fetch('https://api.resend.com/emails', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${resendKey}`
+                },
+                body: JSON.stringify({
+                    from: process.env.EMAIL_FROM || 'Project 24 <auth@project24.app>',
+                    to: [email],
+                    subject: `${otp} is your Project 24 verification code`,
+                    text: `Your verification code for Project 24 is: ${otp}. It will expire in 10 minutes.\n\nIf you did not request this code, please ignore this email.`
+                })
+            });
+            return res.ok;
+        } catch (e) {
+            console.error('[AUTH EMAIL] Resend delivery error:', e.message);
         }
-        if (!mobileNumber || typeof mobileNumber !== 'string') {
-            throw new Error('Please enter a valid mobile number');
-        }
-        const cleanMobile = mobileNumber.replace(/\D/g, '');
-        if (cleanMobile.length < 10) {
-            throw new Error('Please enter a valid 10-digit mobile number');
-        }
+    }
+
+    // Default secure server log (visible in server stdout/logs for verification)
+    console.log(`\n======================================================`);
+    console.log(`[AUTH SERVICE] Email sent to: ${email}`);
+    console.log(`[AUTH SERVICE] Verification OTP: ${otp}`);
+    console.log(`[AUTH SERVICE] Valid for: 10 minutes`);
+    console.log(`======================================================\n`);
+    return true;
+}
+
+const AuthService = {
+    // 1. Send OTP
+    async sendOtp({ email, deviceId }) {
         if (!email || typeof email !== 'string') {
-            throw new Error('Please enter a valid email address');
+            throw new Error('Valid email address is required');
         }
         const cleanEmail = email.trim().toLowerCase();
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(cleanEmail)) {
             throw new Error('Please enter a valid email address');
         }
+        if (!deviceId) {
+            throw new Error('Device identifier is required');
+        }
 
         const db = readDb();
-        const cleanName = fullName.trim();
-        const now = new Date().toISOString();
+        const now = Date.now();
 
-        // Check if an account already exists with this email
-        let user = db.users.find(u => u.email === cleanEmail);
-
-        if (user) {
-            // Restore existing account seamlessly to prevent duplicate accounts
-            user.fullName = cleanName;
-            user.mobileNumber = cleanMobile;
-            user.updatedAt = now;
-            if (deviceId) {
-                user.lastDeviceId = deviceId;
+        // Check if user already exists and has an ACTIVE session on another device
+        const existingUser = db.users.find(u => u.email === cleanEmail);
+        if (existingUser && existingUser.activeSession) {
+            const sess = existingUser.activeSession;
+            // If active session belongs to a different device
+            if (sess.deviceId && sess.deviceId !== deviceId) {
+                // Calculate if session is still within active timeout (30 days)
+                const sessionAge = now - new Date(sess.createdAt).getTime();
+                const maxSessionAge = 30 * 24 * 60 * 60 * 1000;
+                if (sessionAge < maxSessionAge) {
+                    const err = new Error('ACTIVE_SESSION_CONFLICT');
+                    err.conflict = true;
+                    err.message = 'This account is currently active on another device. Project 24 allows only one active device session at a time. Please log out from your other device first.';
+                    throw err;
+                }
             }
+        }
+
+        // Rate limiting check: max 5 requests per hour, cooldown 60 seconds
+        const rateInfo = db.rateLimits[cleanEmail] || { count: 0, firstReq: now, lastReq: 0 };
+        if (rateInfo.lastReq && (now - rateInfo.lastReq) < 60 * 1000) {
+            const waitSec = Math.ceil((60 * 1000 - (now - rateInfo.lastReq)) / 1000);
+            throw new Error(`Please wait ${waitSec} seconds before requesting another code`);
+        }
+        if ((now - rateInfo.firstReq) < 60 * 60 * 1000 && rateInfo.count >= 5) {
+            throw new Error('Too many requests. Please try again after 1 hour.');
+        }
+
+        // Generate 6-digit numeric OTP
+        const otp = crypto.randomInt(100000, 999999).toString();
+        const expiresAt = now + 10 * 60 * 1000; // 10 minutes
+
+        // Update rate limits
+        if ((now - rateInfo.firstReq) >= 60 * 60 * 1000) {
+            db.rateLimits[cleanEmail] = { count: 1, firstReq: now, lastReq: now };
         } else {
-            // Check if mobile number is already used under a different email
-            const existingMobileUser = db.users.find(u => u.mobileNumber === cleanMobile);
-            if (existingMobileUser) {
-                throw new Error('This mobile number is already registered with another account.');
-            }
+            db.rateLimits[cleanEmail] = { count: rateInfo.count + 1, firstReq: rateInfo.firstReq, lastReq: now };
+        }
 
-            // Create new user profile with permanent User ID
-            const newUserId = generatePermanentUserId(db.users);
+        // Save pending OTP securely on backend
+        db.otps[cleanEmail] = {
+            otp,
+            expiresAt,
+            attempts: 0,
+            deviceId
+        };
+        writeDb(db);
+
+        // Send email (or log in dev)
+        await sendEmailOtp(cleanEmail, otp);
+
+        return {
+            success: true,
+            message: `Verification code sent to ${cleanEmail}`
+        };
+    },
+
+    // 2. Verify OTP & Authenticate
+    async verifyOtp({ email, otp, deviceId, userAgent }) {
+        if (!email || !otp) {
+            throw new Error('Email and verification code are required');
+        }
+        const cleanEmail = email.trim().toLowerCase();
+        const cleanOtp = String(otp).trim();
+        const db = readDb();
+        const now = Date.now();
+
+        const pendingOtp = db.otps[cleanEmail];
+        if (!pendingOtp) {
+            throw new Error('No pending verification code found. Please request a new code.');
+        }
+
+        if (now > pendingOtp.expiresAt) {
+            delete db.otps[cleanEmail];
+            writeDb(db);
+            throw new Error('Verification code has expired. Please request a new code.');
+        }
+
+        pendingOtp.attempts = (pendingOtp.attempts || 0) + 1;
+        if (pendingOtp.attempts > 5) {
+            delete db.otps[cleanEmail];
+            writeDb(db);
+            throw new Error('Too many invalid attempts. This code has been invalidated. Please request a new code.');
+        }
+
+        if (pendingOtp.otp !== cleanOtp) {
+            writeDb(db);
+            throw new Error('Invalid verification code. Please check and try again.');
+        }
+
+        // Check Single Device restriction again
+        let user = db.users.find(u => u.email === cleanEmail);
+        if (user && user.activeSession) {
+            const sess = user.activeSession;
+            if (sess.deviceId && sess.deviceId !== deviceId) {
+                const sessionAge = now - new Date(sess.createdAt).getTime();
+                const maxSessionAge = 30 * 24 * 60 * 60 * 1000;
+                if (sessionAge < maxSessionAge) {
+                    const err = new Error('ACTIVE_SESSION_CONFLICT');
+                    err.conflict = true;
+                    err.message = 'This account is currently active on another device. Please log out from that device first.';
+                    throw err;
+                }
+            }
+        }
+
+        // Code is valid! Create account if new, or load existing
+        if (!user) {
+            const nameFromEmail = cleanEmail.split('@')[0].replace(/[._-]/g, ' ');
+            const formattedName = nameFromEmail.charAt(0).toUpperCase() + nameFromEmail.slice(1);
             user = {
-                id: crypto.randomUUID(),
-                userId: newUserId,
-                fullName: cleanName,
-                mobileNumber: cleanMobile,
+                id: crypto.randomUUID ? crypto.randomUUID() : 'u_' + Date.now(),
+                userId: generatePermanentUserId(db.users),
                 email: cleanEmail,
-                emailVerified: false, // Strict requirement: unverified contact info
-                mobileVerified: false, // Strict requirement: unverified contact info
-                role: 'user', // Normal user registration NEVER grants admin privileges
-                createdAt: now,
-                updatedAt: now,
-                lastDeviceId: deviceId || null
+                name: formattedName,
+                createdAt: new Date().toISOString(),
+                activeSession: null
             };
             db.users.push(user);
         }
 
-        // Establish secure authenticated session token
-        const token = crypto.randomBytes(32).toString('hex');
-        user.sessionToken = token;
-        user.lastActive = now;
-
-        writeDb(db);
-
-        // Sanitize return object
-        const sanitizedUser = {
-            id: user.id,
-            userId: user.userId,
-            fullName: user.fullName,
-            mobileNumber: user.mobileNumber,
-            email: user.email,
-            emailVerified: user.emailVerified,
-            mobileVerified: user.mobileVerified,
-            role: user.role,
-            createdAt: user.createdAt
+        // Generate cryptographically secure session token
+        const sessionToken = crypto.randomBytes(32).toString('hex');
+        user.activeSession = {
+            token: sessionToken,
+            deviceId: deviceId || 'unknown',
+            userAgent: userAgent || 'Unknown Browser',
+            createdAt: new Date().toISOString(),
+            lastActive: new Date().toISOString()
         };
 
-        return {
-            success: true,
-            token,
-            user: sanitizedUser
-        };
-    },
-
-    // 2. Super Admin Authentication (Separately Secured with Password)
-    async loginSuperAdmin({ email, password }) {
-        if (!email || !password) {
-            throw new Error('Email and password are required');
-        }
-        const cleanEmail = email.trim().toLowerCase();
-
-        // Strict Super Admin Identity Check
-        if (cleanEmail !== SUPER_ADMIN_EMAIL.toLowerCase()) {
-            throw new Error('Unauthorized: This email does not have Super Admin privileges');
-        }
-
-        if (password !== SUPER_ADMIN_DEFAULT_PASS) {
-            throw new Error('Invalid Super Admin credentials');
-        }
-
-        const db = readDb();
-        const token = crypto.randomBytes(32).toString('hex');
-        const now = new Date().toISOString();
-
-        db.adminSessions[token] = {
-            email: SUPER_ADMIN_EMAIL,
-            role: 'super_admin',
-            createdAt: now,
-            lastActive: now
-        };
-
+        // Invalidate used OTP
+        delete db.otps[cleanEmail];
         writeDb(db);
 
         return {
             success: true,
-            token,
+            sessionToken,
             user: {
-                email: SUPER_ADMIN_EMAIL,
-                role: 'super_admin',
-                fullName: 'Super Administrator'
+                userId: user.userId,
+                email: user.email,
+                name: user.name
             }
         };
     },
 
-    // 3. Validate Session (Normal User or Super Admin)
+    // 3. Validate Session
     async validateSession({ token, deviceId }) {
         if (!token) return null;
         const db = readDb();
-
-        // Check if admin session
-        if (db.adminSessions && db.adminSessions[token]) {
-            const admin = db.adminSessions[token];
-            admin.lastActive = new Date().toISOString();
-            writeDb(db);
-            return {
-                email: admin.email,
-                role: 'super_admin',
-                fullName: 'Super Administrator'
-            };
+        const user = db.users.find(u => u.activeSession && u.activeSession.token === token);
+        if (!user || !user.activeSession) {
+            return null;
         }
 
-        // Check normal user session
-        const user = db.users.find(u => u.sessionToken === token);
-        if (!user) return null;
+        // If device ID was provided and does not match active session device
+        if (deviceId && user.activeSession.deviceId && user.activeSession.deviceId !== deviceId) {
+            return null;
+        }
 
-        user.lastActive = new Date().toISOString();
-        if (deviceId) user.lastDeviceId = deviceId;
+        // Update lastActive
+        user.activeSession.lastActive = new Date().toISOString();
         writeDb(db);
 
         return {
-            id: user.id,
             userId: user.userId,
-            fullName: user.fullName,
-            mobileNumber: user.mobileNumber,
             email: user.email,
-            emailVerified: user.emailVerified,
-            mobileVerified: user.mobileVerified,
-            role: user.role || 'user',
-            createdAt: user.createdAt
+            name: user.name,
+            deviceId: user.activeSession.deviceId,
+            sessionCreatedAt: user.activeSession.createdAt
         };
     },
 
-    // 4. Verify Super Admin Token
-    verifySuperAdmin(token) {
-        if (!token) return false;
-        const db = readDb();
-        const admin = db.adminSessions[token];
-        return Boolean(admin && admin.role === 'super_admin' && admin.email.toLowerCase() === SUPER_ADMIN_EMAIL.toLowerCase());
-    },
-
-    // 5. Admin: Get All Registered Users
-    async getAllUsers({ token }) {
-        if (!this.verifySuperAdmin(token)) {
-            throw new Error('Unauthorized: Super Admin privileges required');
-        }
-        const db = readDb();
-        return db.users.map(u => ({
-            id: u.id,
-            userId: u.userId,
-            fullName: u.fullName,
-            mobileNumber: u.mobileNumber,
-            email: u.email,
-            emailVerified: u.emailVerified,
-            mobileVerified: u.mobileVerified,
-            createdAt: u.createdAt,
-            lastActive: u.lastActive
-        })).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-    },
-
-    // 6. Payment Requests
-    async createPaymentRequest({ token, userId, themeId, amount, utr, screenshot }) {
-        const cleanUtr = String(utr || '').trim().toUpperCase();
-        if (!cleanUtr || cleanUtr.length < 6) {
-            throw new Error('Valid UTR / reference number (min 6 characters) is required');
-        }
-        if (!themeId) {
-            throw new Error('Theme identifier is required');
-        }
-        if (!screenshot) {
-            throw new Error('Payment confirmation screenshot is required');
-        }
-
-        const db = readDb();
-
-        // Check for duplicate UTR
-        const duplicate = db.paymentRequests.find(r => r.utr === cleanUtr);
-        if (duplicate) {
-            throw new Error(`Transaction reference ${cleanUtr} has already been submitted.`);
-        }
-
-        // Get user details
-        let user = null;
-        if (token) {
-            user = await this.validateSession({ token });
-        }
-        if (!user && userId) {
-            user = db.users.find(u => u.userId === userId);
-        }
-
-        const effectiveUserId = user ? user.userId : (userId || 'GUEST');
-        const effectiveUserName = user ? user.fullName : 'Guest User';
-        const effectiveUserEmail = user ? user.email : '';
-
-        const request = {
-            id: 'req_' + Date.now() + '_' + crypto.randomBytes(3).toString('hex'),
-            userId: effectiveUserId,
-            userName: effectiveUserName,
-            userEmail: effectiveUserEmail,
-            themeId,
-            amount: Number(amount) || 29,
-            utr: cleanUtr,
-            screenshot,
-            status: 'pending', // 'pending' | 'approved' | 'rejected'
-            rejectionReason: null,
-            submittedAt: new Date().toISOString(),
-            reviewedAt: null,
-            reviewedBy: null
-        };
-
-        db.paymentRequests.push(request);
-        writeDb(db);
-
-        return request;
-    },
-
-    async getPaymentRequests({ token, filter = {} }) {
-        const db = readDb();
-        const isAdmin = this.verifySuperAdmin(token);
-
-        let list = [...db.paymentRequests];
-
-        if (!isAdmin) {
-            // Normal user: filter by own userId
-            const user = await this.validateSession({ token });
-            if (!user) return [];
-            list = list.filter(r => r.userId === user.userId);
-        } else if (filter.status && filter.status !== 'all') {
-            list = list.filter(r => r.status === filter.status);
-        }
-
-        return list.sort((a, b) => new Date(b.submittedAt) - new Date(a.submittedAt));
-    },
-
-    // 7. Admin: Approve Payment
-    async approvePayment({ token, requestId }) {
-        if (!this.verifySuperAdmin(token)) {
-            throw new Error('Unauthorized: Super Admin privileges required');
-        }
-        const db = readDb();
-        const request = db.paymentRequests.find(r => r.id === requestId);
-        if (!request) {
-            throw new Error('Payment request not found');
-        }
-        if (request.status === 'approved') {
-            throw new Error('This payment request has already been approved');
-        }
-
-        const now = new Date();
-        const previousStatus = request.status;
-        request.status = 'approved';
-        request.reviewedAt = now.toISOString();
-        request.reviewedBy = SUPER_ADMIN_EMAIL;
-
-        // Calculate 1-year entitlement
-        const expiresAt = new Date(now);
-        expiresAt.setFullYear(expiresAt.getFullYear() + 1);
-
-        const entitlement = {
-            id: 'ent_' + Date.now() + '_' + crypto.randomBytes(3).toString('hex'),
-            userId: request.userId,
-            themeId: request.themeId,
-            paymentRequestId: request.id,
-            status: 'active',
-            activatedAt: now.toISOString(),
-            expiresAt: expiresAt.toISOString(),
-            createdAt: now.toISOString()
-        };
-        db.entitlements.push(entitlement);
-
-        // Immutable Audit Log
-        db.auditLogs.push({
-            id: 'log_' + Date.now(),
-            action: 'APPROVE_PAYMENT',
-            paymentRequestId: request.id,
-            userId: request.userId,
-            superAdmin: SUPER_ADMIN_EMAIL,
-            previousStatus,
-            newStatus: 'approved',
-            timestamp: now.toISOString(),
-            details: {
-                themeId: request.themeId,
-                amount: request.amount,
-                utr: request.utr,
-                expiresAt: expiresAt.toISOString()
-            }
-        });
-
-        writeDb(db);
-
-        return { request, entitlement };
-    },
-
-    // 8. Admin: Reject Payment
-    async rejectPayment({ token, requestId, reason }) {
-        if (!this.verifySuperAdmin(token)) {
-            throw new Error('Unauthorized: Super Admin privileges required');
-        }
-        if (!reason || typeof reason !== 'string' || reason.trim().length === 0) {
-            throw new Error('A rejection reason is strictly required');
-        }
-
-        const db = readDb();
-        const request = db.paymentRequests.find(r => r.id === requestId);
-        if (!request) {
-            throw new Error('Payment request not found');
-        }
-
-        const now = new Date();
-        const previousStatus = request.status;
-        request.status = 'rejected';
-        request.rejectionReason = reason.trim();
-        request.reviewedAt = now.toISOString();
-        request.reviewedBy = SUPER_ADMIN_EMAIL;
-
-        // Immutable Audit Log
-        db.auditLogs.push({
-            id: 'log_' + Date.now(),
-            action: 'REJECT_PAYMENT',
-            paymentRequestId: request.id,
-            userId: request.userId,
-            superAdmin: SUPER_ADMIN_EMAIL,
-            previousStatus,
-            newStatus: 'rejected',
-            rejectionReason: reason.trim(),
-            timestamp: now.toISOString(),
-            details: {
-                themeId: request.themeId,
-                amount: request.amount,
-                utr: request.utr
-            }
-        });
-
-        writeDb(db);
-
-        return request;
-    },
-
-    // 9. Admin: Get Audit Logs
-    async getAuditLogs({ token }) {
-        if (!this.verifySuperAdmin(token)) {
-            throw new Error('Unauthorized: Super Admin privileges required');
-        }
-        const db = readDb();
-        return db.auditLogs.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-    },
-
-    // 10. Get Active Entitlements for User
-    async getUserEntitlements(userId) {
-        const db = readDb();
-        const now = new Date();
-        return db.entitlements.filter(e => 
-            e.userId === userId &&
-            e.status === 'active' &&
-            new Date(e.expiresAt) > now
-        );
-    },
-
-    // 11. Admin Logout
-    async logoutAdmin(token) {
+    // 4. Logout (terminates active session on backend)
+    async logout({ token }) {
         if (!token) return { success: true };
         const db = readDb();
-        if (db.adminSessions[token]) {
-            delete db.adminSessions[token];
+        const user = db.users.find(u => u.activeSession && u.activeSession.token === token);
+        if (user) {
+            user.activeSession = null;
             writeDb(db);
         }
-        return { success: true };
+        return { success: true, message: 'Logged out successfully' };
+    },
+
+    // 5. Update Profile
+    async updateProfile({ token, name }) {
+        if (!token || !name) throw new Error('Token and name required');
+        const db = readDb();
+        const user = db.users.find(u => u.activeSession && u.activeSession.token === token);
+        if (!user) throw new Error('Unauthorized');
+
+        user.name = String(name).trim().slice(0, 50);
+        writeDb(db);
+        return {
+            success: true,
+            user: {
+                userId: user.userId,
+                email: user.email,
+                name: user.name
+            }
+        };
+    },
+
+    // Helper for testing/dev: get active users count
+    getUsersCount() {
+        const db = readDb();
+        return db.users.length;
     }
 };
 

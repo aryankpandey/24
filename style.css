@@ -2010,18 +2010,6 @@ body.profile-page main {
     border-radius: 4px;
 }
 
-.badge-unverified {
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    color: #fbbf24;
-    background: rgba(251, 191, 36, 0.1);
-    border: 1px solid rgba(251, 191, 36, 0.25);
-    padding: 2px 7px;
-    border-radius: 4px;
-}
-
 .badge-single-device {
     font-size: 9px;
     font-weight: 700;

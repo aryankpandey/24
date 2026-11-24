@@ -1,4 +1,4 @@
-// api/auth.js – Serverless Function Endpoint for Project 24 Auth & Super Admin
+// api/auth.js – Vercel Serverless Function Endpoint for Project 24 Auth
 const AuthService = require('../backend/auth-service.js');
 
 module.exports = async (req, res) => {
@@ -17,6 +17,7 @@ module.exports = async (req, res) => {
     let action = url.searchParams.get('action');
     if (!action) {
         const parts = url.pathname.split('/').filter(Boolean);
+        // e.g. /api/auth/send-otp
         if (parts.length > 2) {
             action = parts[2];
         }
@@ -34,29 +35,26 @@ module.exports = async (req, res) => {
 
     try {
         switch (action) {
-            // 1. No-OTP User Registration
-            case 'register': {
+            case 'send-otp': {
                 if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
-                const result = await AuthService.registerUser({
-                    fullName: body.fullName,
-                    mobileNumber: body.mobileNumber,
+                const result = await AuthService.sendOtp({
                     email: body.email,
                     deviceId
                 });
                 return res.status(200).json(result);
             }
 
-            // 2. Super Admin Login
-            case 'admin-login': {
+            case 'verify-otp': {
                 if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
-                const result = await AuthService.loginSuperAdmin({
+                const result = await AuthService.verifyOtp({
                     email: body.email,
-                    password: body.password
+                    otp: body.otp,
+                    deviceId,
+                    userAgent: req.headers['user-agent']
                 });
                 return res.status(200).json(result);
             }
 
-            // 3. Session Validation
             case 'session': {
                 if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
                 const user = await AuthService.validateSession({ token, deviceId });
@@ -66,75 +64,15 @@ module.exports = async (req, res) => {
                 return res.status(200).json({ authenticated: true, user });
             }
 
-            // 4. Admin: Get Registered Users
-            case 'users': {
-                if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
-                const users = await AuthService.getAllUsers({ token });
-                return res.status(200).json({ success: true, users });
-            }
-
-            // 5. Submit Payment Request
-            case 'payment-request': {
+            case 'logout': {
                 if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
-                const result = await AuthService.createPaymentRequest({
-                    token,
-                    userId: body.userId,
-                    themeId: body.themeId,
-                    amount: body.amount,
-                    utr: body.utr,
-                    screenshot: body.screenshot
-                });
-                return res.status(200).json({ success: true, request: result });
+                const result = await AuthService.logout({ token });
+                return res.status(200).json(result);
             }
 
-            // 6. Get Payment Requests
-            case 'payment-requests': {
-                if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
-                const status = url.searchParams.get('status') || 'all';
-                const requests = await AuthService.getPaymentRequests({ token, filter: { status } });
-                return res.status(200).json({ success: true, requests });
-            }
-
-            // 7. Admin: Approve Payment
-            case 'approve-payment': {
+            case 'update-profile': {
                 if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
-                const result = await AuthService.approvePayment({
-                    token,
-                    requestId: body.requestId
-                });
-                return res.status(200).json({ success: true, ...result });
-            }
-
-            // 8. Admin: Reject Payment
-            case 'reject-payment': {
-                if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
-                const result = await AuthService.rejectPayment({
-                    token,
-                    requestId: body.requestId,
-                    reason: body.reason
-                });
-                return res.status(200).json({ success: true, request: result });
-            }
-
-            // 9. Admin: Audit Logs
-            case 'audit-logs': {
-                if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
-                const logs = await AuthService.getAuditLogs({ token });
-                return res.status(200).json({ success: true, logs });
-            }
-
-            // 10. User Entitlements
-            case 'entitlements': {
-                if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
-                const userId = url.searchParams.get('userId');
-                const entitlements = await AuthService.getUserEntitlements(userId);
-                return res.status(200).json({ success: true, entitlements });
-            }
-
-            // 11. Super Admin Logout
-            case 'admin-logout': {
-                if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
-                const result = await AuthService.logoutAdmin(token);
+                const result = await AuthService.updateProfile({ token, name: body.name });
                 return res.status(200).json(result);
             }
 
@@ -142,6 +80,10 @@ module.exports = async (req, res) => {
                 return res.status(400).json({ error: 'Invalid auth action specified' });
         }
     } catch (err) {
-        return res.status(400).json({ error: err.message });
+        const status = err.conflict ? 409 : 400;
+        return res.status(status).json({
+            error: err.message,
+            conflict: Boolean(err.conflict)
+        });
     }
 };
