@@ -1,0 +1,14 @@
+{
+  "users": [
+    {
+      "id": "u_aryan_super_admin",
+      "userId": "P24-USR-A1B2C3D4",
+      "email": "aryanpandey7161@gmail.com",
+      "name": "Aryan Pandey",
+      "createdAt": "2026-11-24T00:00:00.000Z",
+      "activeSession": null
+    }
+  ],
+  "otps": {},
+  "rateLimits": {}
+}
