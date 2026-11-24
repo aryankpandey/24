@@ -1,9 +1,7 @@
-const CACHE_NAME = '24-cache-v7';
+const CACHE_NAME = '24-cache-v6';
 const urlsToCache = [
     './',
     './index.html',
-    './login.html',
-    './profile.html',
     './about.html',
     './contact.html',
     './tools.html',
@@ -16,7 +14,6 @@ const urlsToCache = [
     './admin.html',
     './style.css',
     './script.js',
-    './auth-client.js',
     './settings.js',
     './admin.js',
     './theme-manager.js',
@@ -55,11 +52,6 @@ self.addEventListener('activate', event => {
 });
 
 self.addEventListener('fetch', event => {
-    // Network-only for API endpoints
-    if (event.request.url.includes('/api/')) {
-        return;
-    }
-
     event.respondWith(
         caches.match(event.request)
             .then(response => {
