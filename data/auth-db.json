@@ -3,7 +3,7 @@
     {
       "id": "681be843-fa5d-4365-afc9-226474f7cd3e",
       "userId": "P24-USR-C808FBF6",
-      "email": "[EMAIL_ADDRESS]",
+      "email": "aryanpandey7161@gmail.com",
       "name": "Aryan Pandey",
       "createdAt": "2026-11-23T17:47:57.142Z",
       "activeSession": {
@@ -17,7 +17,7 @@
   ],
   "otps": {},
   "rateLimits": {
-    "[EMAIL_ADDRESS]": {
+    "aryanpandey7161@gmail.com": {
       "count": 1,
       "firstReq": 1795456097014,
       "lastReq": 1795456097014
