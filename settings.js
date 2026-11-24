@@ -41,6 +41,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         payDeviceIdDisplay.textContent = deviceId;
     }
 
+    // Show Admin Link if Super Admin is logged in
+    const adminLinkSection = document.getElementById('adminLinkSection');
+    if (adminLinkSection && window.AuthClient) {
+        const user = window.AuthClient.getUser();
+        if (user && user.email && user.email.toLowerCase() === 'aryanpandey7161@gmail.com') {
+            adminLinkSection.style.display = 'block';
+        }
+    }
+
     // Copy Device ID
     if (copyDeviceBtn) {
         copyDeviceBtn.addEventListener('click', () => {

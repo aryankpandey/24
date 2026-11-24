@@ -89,6 +89,11 @@ if (countdownEl) {
     requestAnimationFrame(update);
 }
 
+// Enforce Authentication Gate
+if (window.AuthClient && !window.location.pathname.endsWith('login.html')) {
+    window.AuthClient.requireAuth();
+}
+
 // Menu & Navigation Interaction Logic
 const menuBtn = document.getElementById('menuBtn');
 const menuOverlay = document.getElementById('menuOverlay');

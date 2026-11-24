@@ -45,6 +45,35 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let currentFilter = 'all';
     const ADMIN_PASS_HASH = '24admin'; // Default administrator passcode
+    const SUPER_ADMIN_EMAIL = 'aryanpandey7161@gmail.com';
+
+    // Verify Super Admin Access (both authenticated user email and admin passcode)
+    function checkSuperAdminAccess() {
+        if (window.AuthClient) {
+            const user = window.AuthClient.getUser();
+            if (!user || !user.email || user.email.toLowerCase() !== SUPER_ADMIN_EMAIL.toLowerCase()) {
+                if (authOverlay) {
+                    authOverlay.innerHTML = `
+                        <div class="payment-modal-card" style="max-width: 360px; text-align: center;">
+                            <div style="font-size: 24px; font-weight: 700; margin-bottom: 8px; color: #f87171;">Access Denied</div>
+                            <p style="font-size: 13px; color: #888888; margin-bottom: 20px;">
+                                Super Admin access is restricted to <strong>${SUPER_ADMIN_EMAIL}</strong>.<br><br>
+                                Please sign in with the authorized super administrator account.
+                            </p>
+                            <a href="login.html?redirect=admin.html" class="btn-submit-payment" style="display: block; text-decoration: none; padding: 12px; margin-bottom: 12px;">Sign In as Admin</a>
+                            <a href="index.html" style="font-size: 12px; color: #666; text-decoration: none;">&larr; Return to Home</a>
+                        </div>
+                    `;
+                }
+                return false;
+            }
+        }
+        return true;
+    }
+
+    if (!checkSuperAdminAccess()) {
+        return;
+    }
 
     // Check existing session
     if (sessionStorage.getItem('p24_admin_auth') === 'true') {
