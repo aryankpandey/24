@@ -1,14 +1,368 @@
 {
   "users": [
     {
-      "id": "u_aryan_super_admin",
-      "userId": "P24-USR-A1B2C3D4",
+      "id": "3659d486-fd7f-48cc-8346-5744e3448308",
+      "userId": "P24-5833A767",
+      "fullName": "Aryan Test User Updated",
+      "mobileNumber": "9876543210",
+      "email": "user_1795508106941@example.com",
+      "emailVerified": false,
+      "mobileVerified": false,
+      "role": "user",
+      "createdAt": "2026-11-24T08:15:06.948Z",
+      "updatedAt": "2026-11-24T08:15:06.968Z",
+      "lastDeviceId": null,
+      "sessionToken": "34a455aac468174fdfc42a0796ef32471f35d2d63acb9a1198ce58faad7f7fa8",
+      "lastActive": "2026-11-24T08:15:06.968Z"
+    },
+    {
+      "id": "f828c995-1865-46f7-9885-9e223b2e7877",
+      "userId": "P24-B5204D72",
+      "fullName": "Aryan Impersonator",
+      "mobileNumber": "9998887776",
       "email": "aryanpandey7161@gmail.com",
-      "name": "Aryan Pandey",
-      "createdAt": "2026-11-24T00:00:00.000Z",
-      "activeSession": null
+      "emailVerified": false,
+      "mobileVerified": false,
+      "role": "user",
+      "createdAt": "2026-11-24T08:15:06.971Z",
+      "updatedAt": "2026-11-24T08:17:42.101Z",
+      "lastDeviceId": null,
+      "sessionToken": "dc1926f8099082e4fb49ba7857bcb16e30752d96fde47b840dc9add765a4f9cd",
+      "lastActive": "2026-11-24T08:17:42.101Z"
+    },
+    {
+      "id": "8aa18660-8bba-4fdb-a0ac-2351c0819a38",
+      "userId": "P24-703CAE37",
+      "fullName": "Aryan Test User Updated",
+      "mobileNumber": "9878213170",
+      "email": "user_1795508162031@example.com",
+      "emailVerified": false,
+      "mobileVerified": false,
+      "role": "user",
+      "createdAt": "2026-11-24T08:16:02.033Z",
+      "updatedAt": "2026-11-24T08:16:02.039Z",
+      "lastDeviceId": null,
+      "sessionToken": "b8e084eed094a2f70c39a7ddd9bc117bd08d8ce377f4278a157884f53a8be422",
+      "lastActive": "2026-11-24T08:16:02.039Z"
+    },
+    {
+      "id": "a69a392c-1968-4f20-8b72-6070abe776e2",
+      "userId": "P24-F8AA45D7",
+      "fullName": "Handler Test User",
+      "mobileNumber": "9319196508",
+      "email": "handler_user_1795508232760@example.com",
+      "emailVerified": false,
+      "mobileVerified": false,
+      "role": "user",
+      "createdAt": "2026-11-24T08:17:12.771Z",
+      "updatedAt": "2026-11-24T08:17:12.771Z",
+      "lastDeviceId": null,
+      "sessionToken": "06e3eb909589d59cb3e997277d33d4f289aeee0a5a52e81f37a2fa9834c95f2f",
+      "lastActive": "2026-11-24T08:17:12.780Z"
+    },
+    {
+      "id": "17fe8fe3-6f12-478f-bd8e-bd63f9b33a87",
+      "userId": "P24-BE056A57",
+      "fullName": "Aryan Test User Updated",
+      "mobileNumber": "9829533731",
+      "email": "user_1795508262086@example.com",
+      "emailVerified": false,
+      "mobileVerified": false,
+      "role": "user",
+      "createdAt": "2026-11-24T08:17:42.088Z",
+      "updatedAt": "2026-11-24T08:17:42.097Z",
+      "lastDeviceId": null,
+      "sessionToken": "9c2ad68afb1f5f855d01a6cca9bd84c0abbc9fe6ba556852c2ecd466ab72d007",
+      "lastActive": "2026-11-24T08:17:42.097Z"
     }
   ],
-  "otps": {},
-  "rateLimits": {}
+  "adminSessions": {
+    "48cfac60808ceab889ee05a4d58c9d99f93102882f9f030c966f1ff4f00ab13d": {
+      "email": "aryanpandey7161@gmail.com",
+      "role": "super_admin",
+      "createdAt": "2026-11-24T08:15:06.975Z",
+      "lastActive": "2026-11-24T08:15:06.975Z"
+    },
+    "28084d8508a048c6cf821f053cd8bca4913e0287e6a1050eaaf89357cf2757dc": {
+      "email": "aryanpandey7161@gmail.com",
+      "role": "super_admin",
+      "createdAt": "2026-11-24T08:16:02.048Z",
+      "lastActive": "2026-11-24T08:16:02.048Z"
+    },
+    "dfec7f7b8232e6b06af267560fd85eabe38eb4b156dba8667b166a49b14ef242": {
+      "email": "aryanpandey7161@gmail.com",
+      "role": "super_admin",
+      "createdAt": "2026-11-24T08:17:12.794Z",
+      "lastActive": "2026-11-24T08:17:12.794Z"
+    },
+    "50448c36ec22151e43e58c69288a165bba339f8c139138040bbe04e0bd0c4bed": {
+      "email": "aryanpandey7161@gmail.com",
+      "role": "super_admin",
+      "createdAt": "2026-11-24T08:17:42.107Z",
+      "lastActive": "2026-11-24T08:17:42.107Z"
+    }
+  },
+  "paymentRequests": [
+    {
+      "id": "req_1795508106989_f4793d",
+      "userId": "P24-5833A767",
+      "userName": "Aryan Test User Updated",
+      "userEmail": "user_1795508106941@example.com",
+      "themeId": "neon",
+      "amount": 29,
+      "utr": "UTR08106983",
+      "screenshot": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=",
+      "status": "approved",
+      "rejectionReason": null,
+      "submittedAt": "2026-11-24T08:15:06.989Z",
+      "reviewedAt": "2026-11-24T08:15:06.996Z",
+      "reviewedBy": "aryanpandey7161@gmail.com"
+    },
+    {
+      "id": "req_1795508107005_378188",
+      "userId": "P24-5833A767",
+      "userName": "Aryan Test User Updated",
+      "userEmail": "user_1795508106941@example.com",
+      "themeId": "deep-blue",
+      "amount": 29,
+      "utr": "UTR08107004",
+      "screenshot": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=",
+      "status": "rejected",
+      "rejectionReason": "Invalid UPI reference / Screenshot blurry",
+      "submittedAt": "2026-11-24T08:15:07.008Z",
+      "reviewedAt": "2026-11-24T08:15:07.017Z",
+      "reviewedBy": "aryanpandey7161@gmail.com"
+    },
+    {
+      "id": "req_1795508162057_1ab0a8",
+      "userId": "P24-703CAE37",
+      "userName": "Aryan Test User Updated",
+      "userEmail": "user_1795508162031@example.com",
+      "themeId": "neon",
+      "amount": 29,
+      "utr": "UTR08162054",
+      "screenshot": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=",
+      "status": "approved",
+      "rejectionReason": null,
+      "submittedAt": "2026-11-24T08:16:02.058Z",
+      "reviewedAt": "2026-11-24T08:16:02.066Z",
+      "reviewedBy": "aryanpandey7161@gmail.com"
+    },
+    {
+      "id": "req_1795508162073_9bff33",
+      "userId": "P24-703CAE37",
+      "userName": "Aryan Test User Updated",
+      "userEmail": "user_1795508162031@example.com",
+      "themeId": "deep-blue",
+      "amount": 29,
+      "utr": "UTR08162072",
+      "screenshot": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=",
+      "status": "rejected",
+      "rejectionReason": "Invalid UPI reference / Screenshot blurry",
+      "submittedAt": "2026-11-24T08:16:02.073Z",
+      "reviewedAt": "2026-11-24T08:16:02.081Z",
+      "reviewedBy": "aryanpandey7161@gmail.com"
+    },
+    {
+      "id": "req_1795508232806_25afcf",
+      "userId": "P24-F8AA45D7",
+      "userName": "Handler Test User",
+      "userEmail": "handler_user_1795508232760@example.com",
+      "themeId": "neon",
+      "amount": 29,
+      "utr": "UTR08232800",
+      "screenshot": "data:image/png;base64,sample",
+      "status": "approved",
+      "rejectionReason": null,
+      "submittedAt": "2026-11-24T08:17:12.806Z",
+      "reviewedAt": "2026-11-24T08:17:12.812Z",
+      "reviewedBy": "aryanpandey7161@gmail.com"
+    },
+    {
+      "id": "req_1795508262121_e36314",
+      "userId": "P24-BE056A57",
+      "userName": "Aryan Test User Updated",
+      "userEmail": "user_1795508262086@example.com",
+      "themeId": "neon",
+      "amount": 29,
+      "utr": "UTR08262115",
+      "screenshot": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=",
+      "status": "approved",
+      "rejectionReason": null,
+      "submittedAt": "2026-11-24T08:17:42.121Z",
+      "reviewedAt": "2026-11-24T08:17:42.128Z",
+      "reviewedBy": "aryanpandey7161@gmail.com"
+    },
+    {
+      "id": "req_1795508262137_9475e2",
+      "userId": "P24-BE056A57",
+      "userName": "Aryan Test User Updated",
+      "userEmail": "user_1795508262086@example.com",
+      "themeId": "deep-blue",
+      "amount": 29,
+      "utr": "UTR08262135",
+      "screenshot": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=",
+      "status": "rejected",
+      "rejectionReason": "Invalid UPI reference / Screenshot blurry",
+      "submittedAt": "2026-11-24T08:17:42.137Z",
+      "reviewedAt": "2026-11-24T08:17:42.146Z",
+      "reviewedBy": "aryanpandey7161@gmail.com"
+    }
+  ],
+  "entitlements": [
+    {
+      "id": "ent_1795508106996_374f2b",
+      "userId": "P24-5833A767",
+      "themeId": "neon",
+      "paymentRequestId": "req_1795508106989_f4793d",
+      "status": "active",
+      "activatedAt": "2026-11-24T08:15:06.996Z",
+      "expiresAt": "2027-11-24T08:15:06.996Z",
+      "createdAt": "2026-11-24T08:15:06.996Z"
+    },
+    {
+      "id": "ent_1795508162066_e7bb13",
+      "userId": "P24-703CAE37",
+      "themeId": "neon",
+      "paymentRequestId": "req_1795508162057_1ab0a8",
+      "status": "active",
+      "activatedAt": "2026-11-24T08:16:02.066Z",
+      "expiresAt": "2027-11-24T08:16:02.066Z",
+      "createdAt": "2026-11-24T08:16:02.066Z"
+    },
+    {
+      "id": "ent_1795508232812_24c935",
+      "userId": "P24-F8AA45D7",
+      "themeId": "neon",
+      "paymentRequestId": "req_1795508232806_25afcf",
+      "status": "active",
+      "activatedAt": "2026-11-24T08:17:12.812Z",
+      "expiresAt": "2027-11-24T08:17:12.812Z",
+      "createdAt": "2026-11-24T08:17:12.812Z"
+    },
+    {
+      "id": "ent_1795508262128_7a289d",
+      "userId": "P24-BE056A57",
+      "themeId": "neon",
+      "paymentRequestId": "req_1795508262121_e36314",
+      "status": "active",
+      "activatedAt": "2026-11-24T08:17:42.128Z",
+      "expiresAt": "2027-11-24T08:17:42.128Z",
+      "createdAt": "2026-11-24T08:17:42.128Z"
+    }
+  ],
+  "auditLogs": [
+    {
+      "id": "log_1795508106996",
+      "action": "APPROVE_PAYMENT",
+      "paymentRequestId": "req_1795508106989_f4793d",
+      "userId": "P24-5833A767",
+      "superAdmin": "aryanpandey7161@gmail.com",
+      "previousStatus": "pending",
+      "newStatus": "approved",
+      "timestamp": "2026-11-24T08:15:06.996Z",
+      "details": {
+        "themeId": "neon",
+        "amount": 29,
+        "utr": "UTR08106983",
+        "expiresAt": "2027-11-24T08:15:06.996Z"
+      }
+    },
+    {
+      "id": "log_1795508107017",
+      "action": "REJECT_PAYMENT",
+      "paymentRequestId": "req_1795508107005_378188",
+      "userId": "P24-5833A767",
+      "superAdmin": "aryanpandey7161@gmail.com",
+      "previousStatus": "pending",
+      "newStatus": "rejected",
+      "rejectionReason": "Invalid UPI reference / Screenshot blurry",
+      "timestamp": "2026-11-24T08:15:07.017Z",
+      "details": {
+        "themeId": "deep-blue",
+        "amount": 29,
+        "utr": "UTR08107004"
+      }
+    },
+    {
+      "id": "log_1795508162066",
+      "action": "APPROVE_PAYMENT",
+      "paymentRequestId": "req_1795508162057_1ab0a8",
+      "userId": "P24-703CAE37",
+      "superAdmin": "aryanpandey7161@gmail.com",
+      "previousStatus": "pending",
+      "newStatus": "approved",
+      "timestamp": "2026-11-24T08:16:02.066Z",
+      "details": {
+        "themeId": "neon",
+        "amount": 29,
+        "utr": "UTR08162054",
+        "expiresAt": "2027-11-24T08:16:02.066Z"
+      }
+    },
+    {
+      "id": "log_1795508162081",
+      "action": "REJECT_PAYMENT",
+      "paymentRequestId": "req_1795508162073_9bff33",
+      "userId": "P24-703CAE37",
+      "superAdmin": "aryanpandey7161@gmail.com",
+      "previousStatus": "pending",
+      "newStatus": "rejected",
+      "rejectionReason": "Invalid UPI reference / Screenshot blurry",
+      "timestamp": "2026-11-24T08:16:02.081Z",
+      "details": {
+        "themeId": "deep-blue",
+        "amount": 29,
+        "utr": "UTR08162072"
+      }
+    },
+    {
+      "id": "log_1795508232812",
+      "action": "APPROVE_PAYMENT",
+      "paymentRequestId": "req_1795508232806_25afcf",
+      "userId": "P24-F8AA45D7",
+      "superAdmin": "aryanpandey7161@gmail.com",
+      "previousStatus": "pending",
+      "newStatus": "approved",
+      "timestamp": "2026-11-24T08:17:12.812Z",
+      "details": {
+        "themeId": "neon",
+        "amount": 29,
+        "utr": "UTR08232800",
+        "expiresAt": "2027-11-24T08:17:12.812Z"
+      }
+    },
+    {
+      "id": "log_1795508262128",
+      "action": "APPROVE_PAYMENT",
+      "paymentRequestId": "req_1795508262121_e36314",
+      "userId": "P24-BE056A57",
+      "superAdmin": "aryanpandey7161@gmail.com",
+      "previousStatus": "pending",
+      "newStatus": "approved",
+      "timestamp": "2026-11-24T08:17:42.128Z",
+      "details": {
+        "themeId": "neon",
+        "amount": 29,
+        "utr": "UTR08262115",
+        "expiresAt": "2027-11-24T08:17:42.128Z"
+      }
+    },
+    {
+      "id": "log_1795508262146",
+      "action": "REJECT_PAYMENT",
+      "paymentRequestId": "req_1795508262137_9475e2",
+      "userId": "P24-BE056A57",
+      "superAdmin": "aryanpandey7161@gmail.com",
+      "previousStatus": "pending",
+      "newStatus": "rejected",
+      "rejectionReason": "Invalid UPI reference / Screenshot blurry",
+      "timestamp": "2026-11-24T08:17:42.146Z",
+      "details": {
+        "themeId": "deep-blue",
+        "amount": 29,
+        "utr": "UTR08262135"
+      }
+    }
+  ]
 }

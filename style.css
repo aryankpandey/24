@@ -1,4 +1,4 @@
-﻿@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=JetBrains+Mono:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=JetBrains+Mono:wght@400;700&display=swap');
 
 :root, [data-theme="dark"] {
     --bg-color: #050505;
@@ -2006,6 +2006,18 @@ body.profile-page main {
     color: #4ade80;
     background: rgba(74, 222, 128, 0.1);
     border: 1px solid rgba(74, 222, 128, 0.25);
+    padding: 2px 7px;
+    border-radius: 4px;
+}
+
+.badge-unverified {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: #fbbf24;
+    background: rgba(251, 191, 36, 0.1);
+    border: 1px solid rgba(251, 191, 36, 0.25);
     padding: 2px 7px;
     border-radius: 4px;
 }

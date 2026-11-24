@@ -182,3 +182,12 @@ document.querySelectorAll('.menu-nav-link').forEach(link => {
     });
 });
 
+// Enforce Persistent Session on Protected Application Pages
+if (window.AuthClient && typeof window.AuthClient.requireAuth === 'function') {
+    const isAuthPage = document.body.classList.contains('auth-page') || document.body.classList.contains('admin-page');
+    if (!isAuthPage) {
+        window.AuthClient.requireAuth();
+    }
+}
+
+

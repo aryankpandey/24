@@ -82,9 +82,14 @@
                 throw new Error(`Transaction reference ${cleanUtr} has already been submitted.`);
             }
 
+            const user = window.AuthClient ? window.AuthClient.getUser() : null;
+            const token = window.AuthClient ? window.AuthClient.getToken() : null;
+            const userId = user ? user.userId : deviceId;
+
             const request = {
                 id: 'req_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6),
                 deviceId,
+                userId,
                 themeId,
                 amount: 29,
                 utr: cleanUtr,
@@ -97,6 +102,26 @@
             };
 
             await dbOperation('payment_requests', 'readwrite', store => store.add(request));
+
+            // Sync with Server API
+            try {
+                await fetch('/api/auth?action=payment-request', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+                    },
+                    body: JSON.stringify({
+                        userId,
+                        themeId,
+                        amount: 29,
+                        utr: cleanUtr,
+                        screenshot: screenshotDataUrl
+                    })
+                });
+            } catch (e) {
+                // Offline fallback - will be maintained in IndexedDB
+            }
 
             // Sync with Supabase if configured
             if (window.SUPABASE_CONFIG && window.SUPABASE_CONFIG.isConfigured()) {

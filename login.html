@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>24 – Sign In</title>
-    <meta name="description" content="Sign in or register for Project 24 via email OTP verification.">
+    <title>24 – Get Started</title>
+    <meta name="description" content="Register your account for Project 24. No OTP verification required.">
     <link rel="stylesheet" href="style.css">
     <link rel="manifest" href="manifest.json">
     <link rel="icon" href="icons/icon-192.svg" type="image/svg+xml">
@@ -22,47 +22,44 @@
         </header>
 
         <section class="auth-card-container">
-            <div class="subtitle">AUTHENTICATION</div>
-            <h1 class="page-heading" id="authTitle">Sign In to 24</h1>
-            <p class="auth-desc" id="authSubtitle">Enter your email address to receive a secure one-time verification code.</p>
+            <div class="subtitle">GET STARTED</div>
+            <h1 class="page-heading" id="authTitle">Welcome to 24</h1>
+            <p class="auth-desc" id="authSubtitle">Enter your details to generate your permanent User ID and begin using 24.</p>
 
-            <!-- Alert Box for feedback, errors, and session conflicts -->
+            <!-- Alert Box for feedback & validation errors -->
             <div id="authAlert" class="auth-alert" style="display: none;"></div>
 
-            <!-- STEP 1: Enter Email -->
-            <form id="emailForm" class="auth-form">
+            <!-- NO-OTP Registration Form -->
+            <form id="registerForm" class="auth-form" novalidate>
+                <div class="form-field">
+                    <label class="form-label" for="nameInput">Full Name</label>
+                    <input type="text" id="nameInput" class="form-input" placeholder="e.g. John Doe" required autocomplete="name" autofocus />
+                </div>
+
+                <div class="form-field">
+                    <label class="form-label" for="mobileInput">Mobile Number</label>
+                    <input type="tel" id="mobileInput" class="form-input" placeholder="e.g. 9876543210" maxlength="15" inputmode="tel" required autocomplete="tel" />
+                    <div style="font-size: 11px; color: var(--text-secondary); margin-top: 4px;">10-digit mobile number</div>
+                </div>
+
                 <div class="form-field">
                     <label class="form-label" for="emailInput">Email Address</label>
-                    <input type="email" id="emailInput" class="form-input" placeholder="you@example.com" required autocomplete="email" autofocus />
-                </div>
-                <button type="submit" class="btn-submit-auth" id="sendOtpBtn">
-                    Send Verification Code
-                </button>
-            </form>
-
-            <!-- STEP 2: Enter OTP (Hidden initially) -->
-            <form id="otpForm" class="auth-form" style="display: none;">
-                <div class="form-field">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <label class="form-label" for="otpInput">One-Time Code (6 Digits)</label>
-                        <button type="button" id="changeEmailBtn" class="btn-link" style="font-size: 11px;">Change email</button>
-                    </div>
-                    <input type="text" id="otpInput" class="form-input" placeholder="••••••" maxlength="6" inputmode="numeric" pattern="[0-9]*" required autocomplete="one-time-code" style="letter-spacing: 8px; font-size: 20px; text-align: center;" />
+                    <input type="email" id="emailInput" class="form-input" placeholder="you@example.com" required autocomplete="email" />
                 </div>
 
-                <div class="otp-resend-row">
-                    <span id="resendCountdownText" style="font-size: 12px; color: var(--text-secondary);">Resend code in <strong id="resendTimer">60</strong>s</span>
-                    <button type="button" id="resendOtpBtn" class="btn-link" style="display: none; font-size: 12px;">Resend Code</button>
-                </div>
-
-                <button type="submit" class="btn-submit-auth" id="verifyOtpBtn">
-                    Verify & Continue
+                <button type="submit" class="btn-submit-auth" id="submitRegisterBtn">
+                    Create Account & Enter
                 </button>
             </form>
 
             <div class="auth-footer-note">
-                <p>New users are automatically registered upon verification.</p>
-                <p style="margin-top: 4px; font-size: 11px; color: var(--text-secondary);">One active session per account is permitted at a time.</p>
+                <p>No email or mobile verification required.</p>
+                <p style="margin-top: 6px; font-size: 11px; color: var(--text-secondary);">
+                    Your details will be registered with a unique, permanent Project 24 User ID.
+                </p>
+                <div style="margin-top: 14px;">
+                    <a href="admin.html" style="font-size: 11px; color: var(--text-secondary); text-decoration: none;">Administrator Portal &rarr;</a>
+                </div>
             </div>
         </section>
 
@@ -74,7 +71,7 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // If already authenticated and session valid, redirect directly
+            // If already authenticated and session is active, redirect directly
             if (window.AuthClient && window.AuthClient.isAuthenticated()) {
                 const urlParams = new URLSearchParams(window.location.search);
                 const redirect = urlParams.get('redirect') || 'index.html';
@@ -82,28 +79,12 @@
                 return;
             }
 
-            const emailForm = document.getElementById('emailForm');
-            const otpForm = document.getElementById('otpForm');
+            const registerForm = document.getElementById('registerForm');
+            const nameInput = document.getElementById('nameInput');
+            const mobileInput = document.getElementById('mobileInput');
             const emailInput = document.getElementById('emailInput');
-            const otpInput = document.getElementById('otpInput');
-            const sendOtpBtn = document.getElementById('sendOtpBtn');
-            const verifyOtpBtn = document.getElementById('verifyOtpBtn');
-            const authTitle = document.getElementById('authTitle');
-            const authSubtitle = document.getElementById('authSubtitle');
+            const submitBtn = document.getElementById('submitRegisterBtn');
             const authAlert = document.getElementById('authAlert');
-            const changeEmailBtn = document.getElementById('changeEmailBtn');
-            const resendCountdownText = document.getElementById('resendCountdownText');
-            const resendTimer = document.getElementById('resendTimer');
-            const resendOtpBtn = document.getElementById('resendOtpBtn');
-
-            let currentEmail = '';
-            let timerInterval = null;
-
-            // Check if reason query param exists
-            const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.get('reason') === 'session_expired') {
-                showAlert('Your session has expired or another device was logged in. Please sign in again.', 'warning');
-            }
 
             function showAlert(msg, type = 'error') {
                 authAlert.textContent = msg;
@@ -115,116 +96,59 @@
                 authAlert.style.display = 'none';
             }
 
-            function startResendCountdown(seconds = 60) {
-                if (timerInterval) clearInterval(timerInterval);
-                resendCountdownText.style.display = 'inline';
-                resendOtpBtn.style.display = 'none';
-                resendTimer.textContent = seconds;
-
-                timerInterval = setInterval(() => {
-                    seconds--;
-                    resendTimer.textContent = seconds;
-                    if (seconds <= 0) {
-                        clearInterval(timerInterval);
-                        resendCountdownText.style.display = 'none';
-                        resendOtpBtn.style.display = 'inline';
-                    }
-                }, 1000);
-            }
-
-            // Step 1: Send OTP
-            emailForm.addEventListener('submit', async (e) => {
+            // Handle Registration Submission (NO OTP)
+            registerForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 hideAlert();
-                const email = emailInput.value.trim().toLowerCase();
-                if (!email) return;
 
-                sendOtpBtn.disabled = true;
-                sendOtpBtn.textContent = 'Sending Code...';
+                const fullName = nameInput.value.trim();
+                const mobileNumber = mobileInput.value.trim();
+                const email = emailInput.value.trim();
 
-                try {
-                    await window.AuthClient.sendOtp(email);
-                    currentEmail = email;
-
-                    // Transition to OTP step
-                    emailForm.style.display = 'none';
-                    otpForm.style.display = 'flex';
-                    authTitle.textContent = 'Enter Verification Code';
-                    authSubtitle.textContent = `A 6-digit code was sent to ${email}`;
-                    otpInput.value = '';
-                    otpInput.focus();
-
-                    startResendCountdown(60);
-                } catch (err) {
-                    if (err.conflict) {
-                        showAlert('This account is currently active on another device. Project 24 allows only one active device session at a time. Please log out from your other device first.', 'error');
-                    } else {
-                        showAlert(err.message || 'Failed to send code', 'error');
-                    }
-                } finally {
-                    sendOtpBtn.disabled = false;
-                    sendOtpBtn.textContent = 'Send Verification Code';
-                }
-            });
-
-            // Resend OTP
-            resendOtpBtn.addEventListener('click', async () => {
-                hideAlert();
-                resendOtpBtn.disabled = true;
-                resendOtpBtn.textContent = 'Resending...';
-
-                try {
-                    await window.AuthClient.sendOtp(currentEmail);
-                    showAlert(`A new verification code has been sent to ${currentEmail}`, 'success');
-                    startResendCountdown(60);
-                } catch (err) {
-                    showAlert(err.message || 'Failed to resend code', 'error');
-                } finally {
-                    resendOtpBtn.disabled = false;
-                    resendOtpBtn.textContent = 'Resend Code';
-                }
-            });
-
-            // Change Email button
-            changeEmailBtn.addEventListener('click', () => {
-                hideAlert();
-                if (timerInterval) clearInterval(timerInterval);
-                otpForm.style.display = 'none';
-                emailForm.style.display = 'flex';
-                authTitle.textContent = 'Sign In to 24';
-                authSubtitle.textContent = 'Enter your email address to receive a secure one-time verification code.';
-                emailInput.focus();
-            });
-
-            // Step 2: Verify OTP
-            otpForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                hideAlert();
-                const otp = otpInput.value.trim();
-                if (!otp || otp.length < 6) {
-                    showAlert('Please enter the complete 6-digit verification code', 'error');
+                // Client-side validations
+                if (!fullName || fullName.length < 2) {
+                    showAlert('Please enter your full name (minimum 2 characters)');
+                    nameInput.focus();
                     return;
                 }
 
-                verifyOtpBtn.disabled = true;
-                verifyOtpBtn.textContent = 'Verifying...';
+                const cleanDigits = mobileNumber.replace(/\D/g, '');
+                if (cleanDigits.length < 10) {
+                    showAlert('Please enter a valid 10-digit mobile number');
+                    mobileInput.focus();
+                    return;
+                }
+
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!email || !emailRegex.test(email)) {
+                    showAlert('Please enter a valid email address');
+                    emailInput.focus();
+                    return;
+                }
+
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Creating Account...';
 
                 try {
-                    const result = await window.AuthClient.verifyOtp(currentEmail, otp);
-                    showAlert('Verification successful! Entering 24...', 'success');
+                    const result = await window.AuthClient.register({
+                        fullName,
+                        mobileNumber: cleanDigits,
+                        email
+                    });
 
+                    // Successfully registered and session established
+                    submitBtn.textContent = 'Account Ready! Redirecting...';
+
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const redirect = urlParams.get('redirect') || 'index.html';
                     setTimeout(() => {
-                        const redirect = urlParams.get('redirect') || 'index.html';
                         window.location.replace(redirect);
-                    }, 800);
+                    }, 500);
+
                 } catch (err) {
-                    if (err.conflict) {
-                        showAlert('Login blocked: This account is currently active on another device. Please log out from that device first.', 'error');
-                    } else {
-                        showAlert(err.message || 'Invalid or expired verification code', 'error');
-                    }
-                    verifyOtpBtn.disabled = false;
-                    verifyOtpBtn.textContent = 'Verify & Continue';
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Create Account & Enter';
+                    showAlert(err.message || 'Registration failed. Please try again.');
                 }
             });
         });

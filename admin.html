@@ -3,26 +3,34 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>24 – Administrator Dashboard</title>
+    <title>24 – Super Administrator Dashboard</title>
     <meta name="robots" content="noindex, nofollow" />
     <link rel="stylesheet" href="style.css" />
     <link rel="icon" href="icons/icon-192.svg" type="image/svg+xml" />
     <meta name="theme-color" content="#050505" />
     <script src="theme-manager.js"></script>
-    <script src="supabase-config.js"></script>
     <script src="storage-service.js"></script>
     <script src="auth-client.js"></script>
 </head>
 <body class="admin-page">
-    <!-- Admin Authentication Gate -->
+    <!-- Super Admin Authentication Gate -->
     <div id="adminAuthOverlay" class="payment-modal-overlay active" style="z-index: 5000;">
-        <div class="payment-modal-card" style="max-width: 360px; text-align: center;">
-            <div style="font-size: 24px; font-weight: 700; margin-bottom: 8px;">24 Admin</div>
-            <p style="font-size: 13px; color: #888888; margin-bottom: 20px;">Enter administrator passcode to access payment verification and entitlement controls.</p>
-            <form id="adminAuthForm">
-                <input type="password" id="adminPassInput" class="form-input" placeholder="Passcode (default: 24admin)" style="width: 100%; text-align: center; margin-bottom: 12px;" required autofocus />
-                <div id="adminAuthAlert" style="display: none; color: #f87171; font-size: 12px; margin-bottom: 12px;"></div>
-                <button type="submit" class="btn-submit-payment" style="width: 100%;">Unlock Admin Dashboard</button>
+        <div class="payment-modal-card" style="max-width: 380px; text-align: center;">
+            <div style="font-size: 24px; font-weight: 700; margin-bottom: 8px;">24 Super Admin</div>
+            <p style="font-size: 13px; color: #888888; margin-bottom: 20px;">
+                Enter Super Administrator credentials to manage users, verify payments, and grant entitlements.
+            </p>
+            <form id="adminAuthForm" style="display: flex; flex-direction: column; gap: 12px;">
+                <div>
+                    <input type="email" id="adminEmailInput" class="form-input" placeholder="Super Admin Email" value="aryanpandey7161@gmail.com" required style="width: 100%; text-align: center;" />
+                </div>
+                <div>
+                    <input type="password" id="adminPassInput" class="form-input" placeholder="Passcode (default: 24admin)" style="width: 100%; text-align: center;" required autofocus />
+                </div>
+                <div id="adminAuthAlert" style="display: none; color: #f87171; font-size: 12px; margin-top: 4px;"></div>
+                <button type="submit" class="btn-submit-payment" id="adminLoginBtn" style="width: 100%; margin-top: 8px;">
+                    Unlock Dashboard
+                </button>
             </form>
             <div style="margin-top: 16px;">
                 <a href="index.html" style="font-size: 12px; color: #666; text-decoration: none;">&larr; Return to Home</a>
@@ -41,7 +49,7 @@
                     </svg>
                 </a>
                 <a href="index.html" class="logo-link"><h1 class="logo">24</h1></a>
-                <span style="font-size: 12px; font-weight: 700; letter-spacing: 2px; color: #e0e0e0; margin-left: 8px;">ADMIN</span>
+                <span style="font-size: 11px; font-weight: 700; letter-spacing: 2px; color: #e0e0e0; margin-left: 8px; background: #222; padding: 2px 8px; border-radius: 4px;">SUPER ADMIN</span>
             </div>
             <div>
                 <button id="adminLogoutBtn" class="btn-transfer-request" style="font-size: 11px;">Lock Session</button>
@@ -49,11 +57,15 @@
         </header>
 
         <section class="admin-container" style="padding: 24px 0;">
-            <div class="subtitle">MONETIZATION CONTROLS</div>
-            <h2 class="page-heading">Payment Verification & Entitlements</h2>
+            <div class="subtitle">CONTROL PANEL</div>
+            <h2 class="page-heading">Super Admin Dashboard</h2>
 
             <!-- Metrics Overview Grid -->
             <div class="admin-metrics-grid">
+                <div class="admin-metric-card">
+                    <div class="admin-metric-num" id="metricUsers" style="color: #38bdf8;">0</div>
+                    <div class="admin-metric-label">Registered Users</div>
+                </div>
                 <div class="admin-metric-card">
                     <div class="admin-metric-num" id="metricTotal">0</div>
                     <div class="admin-metric-label">Total Requests</div>
@@ -74,14 +86,24 @@
 
             <!-- Dashboard Navigation Tabs -->
             <div class="admin-tabs">
-                <button class="admin-tab-btn active" id="tabRequests">Payment Requests</button>
+                <button class="admin-tab-btn active" id="tabUsers">Registered Users</button>
+                <button class="admin-tab-btn" id="tabRequests">Payment Requests</button>
                 <button class="admin-tab-btn" id="tabEntitlements">Active Entitlements</button>
-                <button class="admin-tab-btn" id="tabTransfers">Device Transfers</button>
                 <button class="admin-tab-btn" id="tabLogs">Audit Logs</button>
             </div>
 
-            <!-- View 1: Payment Requests -->
-            <div id="viewRequests">
+            <!-- View 1: Registered Users -->
+            <div id="viewUsers">
+                <div style="margin-bottom: 12px; font-size: 12px; color: var(--text-secondary);">
+                    All users registered without OTP. Permanent User IDs are generated and immutable.
+                </div>
+                <div class="admin-list-container" id="usersList">
+                    <div class="admin-card" style="text-align: center; color: var(--text-secondary); padding: 24px;">Loading users...</div>
+                </div>
+            </div>
+
+            <!-- View 2: Payment Requests -->
+            <div id="viewRequests" style="display: none;">
                 <div style="display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap;">
                     <button class="admin-tab-btn active" id="filterAllBtn" style="font-size: 12px; padding: 4px 10px;">All</button>
                     <button class="admin-tab-btn" id="filterPendingBtn" style="font-size: 12px; padding: 4px 10px;">Pending</button>
@@ -91,14 +113,9 @@
                 <div class="admin-list-container" id="requestsList"></div>
             </div>
 
-            <!-- View 2: Active Entitlements -->
+            <!-- View 3: Active Entitlements -->
             <div id="viewEntitlements" style="display: none;">
                 <div class="admin-list-container" id="entitlementsList"></div>
-            </div>
-
-            <!-- View 3: Device Transfers -->
-            <div id="viewTransfers" style="display: none;">
-                <div class="admin-list-container" id="transfersList"></div>
             </div>
 
             <!-- View 4: Audit Logs -->
@@ -116,6 +133,21 @@
     <!-- Screenshot Zoom Lightbox Modal -->
     <div id="imgZoomModal" class="img-zoom-modal" style="display: none;">
         <img id="imgZoomTarget" alt="Enlarged Payment Screenshot" />
+    </div>
+
+    <!-- Reject Reason Modal -->
+    <div id="rejectModal" class="payment-modal-overlay" style="display: none; z-index: 6000;">
+        <div class="payment-modal-card" style="max-width: 380px;">
+            <div style="font-size: 18px; font-weight: 700; margin-bottom: 8px; color: #f87171;">Reject Payment Request</div>
+            <p style="font-size: 13px; color: #888888; margin-bottom: 16px;">
+                A clear reason is strictly required for rejection and will be recorded in the audit trail.
+            </p>
+            <textarea id="rejectReasonInput" class="form-input" placeholder="e.g. Invalid UTR reference / Screenshot unreadable" style="width: 100%; height: 80px; resize: none; margin-bottom: 12px;"></textarea>
+            <div style="display: flex; gap: 8px;">
+                <button type="button" class="btn-cancel" id="cancelRejectBtn" style="flex: 1;">Cancel</button>
+                <button type="button" class="btn-submit-payment" id="confirmRejectBtn" style="flex: 1; background: #dc2626;">Confirm Rejection</button>
+            </div>
+        </div>
     </div>
 
     <script src="admin.js"></script>
